@@ -768,60 +768,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   deckParent: {fileID: 965226654}
-  backSprite: {fileID: 21300000, guid: 39b99bdc8ed2d457bb17d3806bac2197, type: 3}
-  cardSprites:
-  - {fileID: 21300000, guid: 8cec49c3607104545aab2340b5d823bc, type: 3}
-  - {fileID: 21300000, guid: 709dfebc1ef2a44a2a6c38c7c20392ec, type: 3}
-  - {fileID: 21300000, guid: 0e6945eb9464f4189936ce42f2338096, type: 3}
-  - {fileID: 21300000, guid: 932cb7208b94c40019e86e43b201652f, type: 3}
-  - {fileID: 21300000, guid: 0e8321d2d3d814598a84b6dc443a7b1e, type: 3}
-  - {fileID: 21300000, guid: c4505a99dc3ff48b3adbe298f7744bfd, type: 3}
-  - {fileID: 21300000, guid: e18d7b0c603224f7c87e6f9e84bcfc58, type: 3}
-  - {fileID: 21300000, guid: d35284e7288644864bdc9c4ed957addb, type: 3}
-  - {fileID: 21300000, guid: cd2b4f7c7ef9c45f7a84c7d4cdd19990, type: 3}
-  - {fileID: 21300000, guid: ff2b437aebc144b3d943f4ee288052cd, type: 3}
-  - {fileID: 21300000, guid: df168f47ec9594135bbe4d741f86102c, type: 3}
-  - {fileID: 21300000, guid: 89d3d0f096aa54567b1317abe60da4a7, type: 3}
-  - {fileID: 21300000, guid: 17a49eec6c3054ef1930fea52bcecb43, type: 3}
-  - {fileID: 21300000, guid: 8ce8e179f4bfc4907a1d19f705f7efc3, type: 3}
-  - {fileID: 21300000, guid: c75a675beb622476eb7ec66e4189207f, type: 3}
-  - {fileID: 21300000, guid: d732032374b924625975fe3e78e58c26, type: 3}
-  - {fileID: 21300000, guid: 885313353ecec459aaf11ba7ef887ecd, type: 3}
-  - {fileID: 21300000, guid: a584de994edfb449ab0c95f34baf5733, type: 3}
-  - {fileID: 21300000, guid: 3cde22c81ab2b405cb5d0736593d61c5, type: 3}
-  - {fileID: 21300000, guid: ae97d5322244a4b91b1a871ce5f35f80, type: 3}
-  - {fileID: 21300000, guid: eb0cb0a5230b749cba9a5df6747701bf, type: 3}
-  - {fileID: 21300000, guid: 00aa9e9141248452fa1f6293855b4785, type: 3}
-  - {fileID: 21300000, guid: d4ded366ad7d445ebab03b29f93ff92d, type: 3}
-  - {fileID: 21300000, guid: 0c162bb14077e4670925203294b7486a, type: 3}
-  - {fileID: 21300000, guid: 724f7268d79004410a36add3cb0dd80f, type: 3}
-  - {fileID: 21300000, guid: c643144f687ca49f58af7a839b9efd55, type: 3}
-  - {fileID: 21300000, guid: 7b7a22687174c4696a4681fda9c2d95e, type: 3}
-  - {fileID: 21300000, guid: 62fa806e42445496d9cc3ea0ca5ce9c4, type: 3}
-  - {fileID: 21300000, guid: c58ef3f6fbb5d4d90afc55fdd25744f3, type: 3}
-  - {fileID: 21300000, guid: 050c944f5d7dd4535a622e0506bc3a33, type: 3}
-  - {fileID: 21300000, guid: b3e1625a179ae4d93b62b770f3174142, type: 3}
-  - {fileID: 21300000, guid: b9a8de65d337a4e3a9fd988b9f4b149b, type: 3}
-  - {fileID: 21300000, guid: 55db011da00b4446b86f3f73d59d0e08, type: 3}
-  - {fileID: 21300000, guid: d2e4496ea557d4242baaa084969de853, type: 3}
-  - {fileID: 21300000, guid: 4fa0fc1d11ffe43afaa0defdaccb2965, type: 3}
-  - {fileID: 21300000, guid: 5d6c507a470ed4ac09483e0efba8d076, type: 3}
-  - {fileID: 21300000, guid: 680c016a3a1b64eaf80dbcf66f4e6b49, type: 3}
-  - {fileID: 21300000, guid: 6a7400f28626645189f5a2c49a35de4e, type: 3}
-  - {fileID: 21300000, guid: 96d734b573bc94be1b6a6029f3f33adc, type: 3}
-  - {fileID: 21300000, guid: 4228c492b91e34b31819912541535e92, type: 3}
-  - {fileID: 21300000, guid: 3b9afe8954b8045f2b136b9c327b3b3a, type: 3}
-  - {fileID: 21300000, guid: b94b037980a6840249c80a09e41d3bfa, type: 3}
-  - {fileID: 21300000, guid: 702f8c67775364e90a5dcaeaa53ddd5b, type: 3}
-  - {fileID: 21300000, guid: be1c6e22d3eda429ca70dde2ee4de789, type: 3}
-  - {fileID: 21300000, guid: f3f5159f7cdd249bb94ee8d6ef9f6fc3, type: 3}
-  - {fileID: 21300000, guid: d10d8cb5577cd47939eabb9de8701e53, type: 3}
-  - {fileID: 21300000, guid: f36f67389b2ef4efd9eb5b5018ca8f73, type: 3}
-  - {fileID: 21300000, guid: 08243402a831c4a93891a9c7f4b13f5d, type: 3}
-  - {fileID: 21300000, guid: 237491b979df646eba4c6ee71c74ec73, type: 3}
-  - {fileID: 21300000, guid: 6c259a4594a714eb38b4081f016d349e, type: 3}
-  - {fileID: 21300000, guid: 2f4a71c522d19453f83a5e14456f65ef, type: 3}
-  - {fileID: 21300000, guid: 4b7107c79c4c24eea8fb626ff48a75d3, type: 3}
+  cardDataConfig: {fileID: 11400000, guid: 7f4b5032615804fc5aa18bb125b8d747, type: 2}
 --- !u!4 &1756827014
 Transform:
   m_ObjectHideFlags: 0

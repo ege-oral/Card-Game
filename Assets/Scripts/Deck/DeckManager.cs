@@ -1,6 +1,9 @@
 using System.Collections.Generic;
 using Cards;
+using Cards.Config;
 using Cards.Factory;
+using Sirenix.OdinInspector;
+using Sirenix.Serialization;
 using UnityEngine;
 using Zenject;
 
@@ -8,51 +11,69 @@ namespace Deck
 {
     public class DeckManager : MonoBehaviour
     {
-        private CardControllerFactory _cardControllerFactory;
-        
         [SerializeField] private Transform deckParent;
-        [SerializeField] private Sprite backSprite;
-        [SerializeField] private List<Sprite> cardSprites; // Assign 52 card textures in Inspector
-
-        private readonly CardSuit[] _suits = { CardSuit.Spades, CardSuit.Hearts, CardSuit.Diamonds, CardSuit.Clubs };
-        private readonly int[] _ranks = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 }; // Ace to King
+        [SerializeField] private CardDataConfig cardDataConfig;
         
-        private readonly List<CardController> _deck = new();
+        private CardControllerFactory _cardFactory;
+        private readonly List<CardController> _orderedDeckList = new();
+        
+        [OdinSerialize, ShowInInspector] // todo: remove this 
+        private readonly Stack<CardController> _deckStack = new();
         private const float CardOffset = 0.015f;
 
         [Inject]
-        public void Construct(CardControllerFactory cardControllerFactory)
+        public void Construct(CardControllerFactory cardFactory)
         {
-            _cardControllerFactory = cardControllerFactory;
+            _cardFactory = cardFactory;
         }
 
         private void Start()
         {
-            GenerateDeck();
+            GenerateOrderedCardList();
+            ShuffleCardList();
+            GenerateRandomStackDeck();
         }
         
-        private void GenerateDeck()
+        private void GenerateOrderedCardList()
         {
-            var spriteIndex = 0;
+            _orderedDeckList.Clear();
             
-            foreach (var suit in _suits)
+            foreach (var (suit, spriteData) in cardDataConfig.CardSpritesBySuit)
             {
-                foreach (var rank in _ranks)
+                foreach (var (rank, sprite) in spriteData)
                 {
-                    if (spriteIndex >= cardSprites.Count) break;
+                    var card = _cardFactory.Create();
+                    var cardData = new CardData(suit, rank, sprite, cardDataConfig.backSprite);
 
-                    var newCardController = _cardControllerFactory.Create();
-                    var newCardData = new CardData(suit, rank, cardSprites[spriteIndex], backSprite);
-            
-                    newCardController.Initialize(newCardData);
-                    newCardController.transform.SetParent(deckParent, worldPositionStays: false);
-
-                    newCardController.transform.rotation = Quaternion.Euler(new Vector3(-120, 0, 0));
-                    newCardController.transform.position = new Vector3(deckParent.position.x,
-                        deckParent.position.y + CardOffset * spriteIndex, deckParent.position.z);
-                    _deck.Add(newCardController);
-                    spriteIndex++;
+                    card.Initialize(cardData);
+                    _orderedDeckList.Add(card);
                 }
+            }
+        }
+        
+        private void ShuffleCardList()
+        {
+            if (_orderedDeckList.Count == 0) return;
+
+            for (var i = _orderedDeckList.Count - 1; i > 0; i--)
+            {
+                var randomIndex = Random.Range(0, i + 1);
+                (_orderedDeckList[i], _orderedDeckList[randomIndex]) = (_orderedDeckList[randomIndex], _orderedDeckList[i]);
+            }
+        }
+        
+        private void GenerateRandomStackDeck()
+        {
+            _deckStack.Clear();
+            for (var i = 0; i < _orderedDeckList.Count; i++)
+            {
+                var card = _orderedDeckList[i];
+                
+                card.transform.SetParent(deckParent, worldPositionStays: false);
+                card.transform.rotation = Quaternion.Euler(-120, 0, 0);
+                card.transform.position = deckParent.position + Vector3.up * (CardOffset * i);
+
+                _deckStack.Push(card);
             }
         }
     }
