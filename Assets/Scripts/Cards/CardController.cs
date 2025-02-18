@@ -24,10 +24,13 @@ namespace Cards
             backRenderer.sprite = cardData.BackSprite;
         }
 
-        public void UpdateSortingOrder(int sortingOrder)
+        public void UpdateSorting(int sortingOrder, string sortingLayerName = "Default")
         {
             frontRenderer.sortingOrder = sortingOrder;
+            frontRenderer.sortingLayerName = sortingLayerName;
+            
             backRenderer.sortingOrder = sortingOrder;
+            backRenderer.sortingLayerName = sortingLayerName;
         }
     }
 }

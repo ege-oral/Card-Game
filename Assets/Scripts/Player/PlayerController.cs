@@ -91,7 +91,7 @@ namespace Player
             var handPosition = BezierUtility.GetPoint(startPoint.position, controlPoint.position, endPoint.position, t);
             var getNextSortingOrder = _cardSortOrderService.GetNextSortingOrder();
             var zRotation = Mathf.Lerp(10f, -10f, t);
-            card.UpdateSortingOrder(getNextSortingOrder);
+            card.UpdateSorting(getNextSortingOrder);
             
             var sequence = DOTween.Sequence();
             sequence.Join(card.transform.DOMove(controlPoint.position, drawSpeed));
