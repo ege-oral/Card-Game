@@ -1,5 +1,6 @@
 using Cards;
 using Cards.Factory;
+using Cards.Services;
 using Deck;
 using UnityEngine;
 using Zenject;
@@ -12,6 +13,7 @@ namespace Installers
         public override void InstallBindings()
         {
             Container.Bind<Card>().AsTransient();
+            Container.BindInterfacesTo<CardSortOrderService>().AsSingle();
             Container.Bind<DeckManager>().FromComponentInHierarchy().AsSingle();
             Container.BindFactory<CardController, CardControllerFactory>().FromComponentInNewPrefab(cardPrefab);
         }

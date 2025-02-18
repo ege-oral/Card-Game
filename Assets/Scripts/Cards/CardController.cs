@@ -24,5 +24,10 @@ namespace Cards
             backRenderer.sprite = cardData.BackSprite;
         }
 
+        public void UpdateSortingOrder(int sortingOrder)
+        {
+            frontRenderer.sortingOrder = sortingOrder;
+            backRenderer.sortingOrder = sortingOrder;
+        }
     }
 }

@@ -31,6 +31,18 @@ namespace Deck
             GenerateRandomStackDeck();
         }
         
+        public bool TryDrawCard(out CardController card)
+        {
+            if (_deckStack.Count > 0)
+            {
+                card = _deckStack.Pop();
+                return true;
+            }
+
+            card = null;
+            return false;
+        }
+        
         private void GenerateOrderedCardList()
         {
             _orderedDeckList.Clear();
@@ -68,7 +80,7 @@ namespace Deck
                 
                 card.transform.SetParent(deckParent, worldPositionStays: false);
                 card.transform.rotation = Quaternion.Euler(-120, 0, 0);
-                card.transform.position = deckParent.position + Vector3.down * (CardOffset * i);
+                card.transform.position = deckParent.position + Vector3.up * (CardOffset * i);
 
                 _deckStack.Push(card);
             }
