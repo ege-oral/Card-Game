@@ -2,8 +2,6 @@ using System.Collections.Generic;
 using Cards;
 using Cards.Config;
 using Cards.Factory;
-using Sirenix.OdinInspector;
-using Sirenix.Serialization;
 using UnityEngine;
 using Zenject;
 
@@ -17,7 +15,6 @@ namespace Deck
         private CardControllerFactory _cardFactory;
         private readonly List<CardController> _orderedDeckList = new();
         
-        [OdinSerialize, ShowInInspector] // todo: remove this 
         private readonly Stack<CardController> _deckStack = new();
         private const float CardOffset = 0.015f;
 
@@ -53,7 +50,7 @@ namespace Deck
         
         private void ShuffleCardList()
         {
-            if (_orderedDeckList.Count == 0) return;
+            if (_orderedDeckList.Count <= 1) return;
 
             for (var i = _orderedDeckList.Count - 1; i > 0; i--)
             {
@@ -71,7 +68,7 @@ namespace Deck
                 
                 card.transform.SetParent(deckParent, worldPositionStays: false);
                 card.transform.rotation = Quaternion.Euler(-120, 0, 0);
-                card.transform.position = deckParent.position + Vector3.up * (CardOffset * i);
+                card.transform.position = deckParent.position + Vector3.down * (CardOffset * i);
 
                 _deckStack.Push(card);
             }
