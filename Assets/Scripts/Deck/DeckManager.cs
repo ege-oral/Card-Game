@@ -1,6 +1,7 @@
 using System.Collections.Generic;
-using Cards;
 using Cards.Config;
+using Cards.Data;
+using Cards.View;
 using Cards.Factory;
 using UnityEngine;
 using Zenject;
@@ -13,8 +14,8 @@ namespace Deck
         [SerializeField] private CardDataConfig cardDataConfig;
         
         private CardControllerFactory _cardFactory;
-        private readonly List<CardController> _orderedDeckList = new();
         
+        private readonly List<CardController> _deckList = new();
         private readonly Stack<CardController> _deckStack = new();
         private const float CardOffset = 0.015f;
 
@@ -45,7 +46,7 @@ namespace Deck
         
         private void GenerateOrderedCardList()
         {
-            _orderedDeckList.Clear();
+            _deckList.Clear();
             
             foreach (var (suit, spriteData) in cardDataConfig.CardSpritesBySuit)
             {
@@ -55,28 +56,28 @@ namespace Deck
                     var cardData = new CardData(suit, rank, sprite, cardDataConfig.backSprite);
 
                     card.Initialize(cardData);
-                    _orderedDeckList.Add(card);
+                    _deckList.Add(card);
                 }
             }
         }
         
         private void ShuffleCardList()
         {
-            if (_orderedDeckList.Count <= 1) return;
+            if (_deckList.Count <= 1) return;
 
-            for (var i = _orderedDeckList.Count - 1; i > 0; i--)
+            for (var i = _deckList.Count - 1; i > 0; i--)
             {
                 var randomIndex = Random.Range(0, i + 1);
-                (_orderedDeckList[i], _orderedDeckList[randomIndex]) = (_orderedDeckList[randomIndex], _orderedDeckList[i]);
+                (_deckList[i], _deckList[randomIndex]) = (_deckList[randomIndex], _deckList[i]);
             }
         }
         
         private void GenerateRandomStackDeck()
         {
             _deckStack.Clear();
-            for (var i = 0; i < _orderedDeckList.Count; i++)
+            for (var i = 0; i < _deckList.Count; i++)
             {
-                var card = _orderedDeckList[i];
+                var card = _deckList[i];
                 
                 card.transform.SetParent(deckParent, worldPositionStays: false);
                 card.transform.rotation = Quaternion.Euler(-120, 0, 0);

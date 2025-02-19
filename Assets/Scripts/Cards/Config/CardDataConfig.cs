@@ -1,11 +1,12 @@
 using System.Collections.Generic;
+using Cards.Data;
 using Sirenix.OdinInspector;
 using Sirenix.Serialization;
 using UnityEngine;
 
 namespace Cards.Config
 {
-    [CreateAssetMenu(fileName = "CardDataConfig", menuName = "Card/CardDataConfig")]
+    [CreateAssetMenu(fileName = "CardDataConfig", menuName = "Cards/CardDataConfig")]
     public class CardDataConfig : SerializedScriptableObject
     {
         [Header("Card Assets")]

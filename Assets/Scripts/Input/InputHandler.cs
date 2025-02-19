@@ -1,5 +1,5 @@
-using Cards;
 using UnityEngine;
+using Cards.View;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.EnhancedTouch;
 

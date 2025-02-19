@@ -1,6 +1,7 @@
+using Cards.Data;
 using UnityEngine;
 
-namespace Cards
+namespace Cards.View
 {
     public class CardController : MonoBehaviour
     {
