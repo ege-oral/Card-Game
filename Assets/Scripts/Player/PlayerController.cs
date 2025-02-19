@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Cards.Data;
 using Cards.Services;
 using Cards.View;
 using Common;
@@ -25,6 +26,7 @@ namespace Player
         
         private ISorting _oneTwoThreeSorting;
         private ISorting _sevenSevenSevenSorting;
+        private ISorting _smartSorting;
 
 
         [Inject]
@@ -32,13 +34,15 @@ namespace Player
             ICardSortingService cardSortingService,
             SignalBus signalBus,
             [Inject(Id = "OneTwoThreeSorting")] ISorting oneTwoThreeSorting,
-            [Inject(Id = "SevenSevenSevenSorting")] ISorting sevenSevenSevenSorting)
+            [Inject(Id = "SevenSevenSevenSorting")] ISorting sevenSevenSevenSorting,
+            [Inject(Id = "SmartSorting")] ISorting smartSorting)
         {
             _deckManager = deckManager;
             _cardSortingService = cardSortingService;
             _signalBus = signalBus;
             _oneTwoThreeSorting = oneTwoThreeSorting;
             _sevenSevenSevenSorting = sevenSevenSevenSorting;
+            _smartSorting = smartSorting;
             _handTest.Value = new List<CardController>();
             _handTest.ValueChanged += TestMethod;
         }
@@ -97,6 +101,36 @@ namespace Player
                 cardAnimationController.PlayDrawAnimation(card, _handTest.Value.Count, maxHandSize);
             }
         }
+
+        [Button]
+        public void DrawSpecificCards()
+        {
+            var cardTuples = new List<(CardSuit Suit, int Rank)>
+            {
+                (CardSuit.Hearts, 1),
+                (CardSuit.Spades, 2),
+                (CardSuit.Diamonds, 5),
+                (CardSuit.Hearts, 4),
+                (CardSuit.Spades, 1),
+                (CardSuit.Diamonds, 3),
+                (CardSuit.Clubs, 4),
+                (CardSuit.Spades, 4),
+                (CardSuit.Diamonds, 1),
+                (CardSuit.Spades, 3),
+                (CardSuit.Diamonds, 4)
+            };
+           
+            if (_handTest.Value.Count >= maxHandSize) return;
+
+            foreach (var (suit, rank) in cardTuples)
+            {
+                if (_deckManager.TryDrawSpecificCard(suit, rank, out var card))
+                {
+                    AddItToHand(card);
+                    cardAnimationController.PlayDrawAnimation(card, _handTest.Value.Count, maxHandSize);
+                }
+            }
+        }
         
         private void AddItToHand(CardController card)
         {
@@ -115,8 +149,16 @@ namespace Player
         [Button]
         public void SevenSevenSevenOrder()
         {
-            var sortHandByOneTwoThree = _cardSortingService.SortHandByRule(_handTest.Value, _sevenSevenSevenSorting);
-            _handTest.Value = sortHandByOneTwoThree;
+            var sortHandBySevenSevenSeven = _cardSortingService.SortHandByRule(_handTest.Value, _sevenSevenSevenSorting);
+            _handTest.Value = sortHandBySevenSevenSeven;
+            cardAnimationController.ReArrangeHand(_handTest.Value);
+        }
+        
+        [Button]
+        public void SmartOrder()
+        {
+            var sortHandBySmart = _cardSortingService.SortHandByRule(_handTest.Value, _smartSorting);
+            _handTest.Value = sortHandBySmart;
             cardAnimationController.ReArrangeHand(_handTest.Value);
         }
     }

@@ -18,7 +18,7 @@ namespace Cards.Services
             _cardRankComparer = cardRankComparer;
         }
         
-        public List<CardController> SortHand(List<CardController> hand)
+        public List<CardController> SortHand(IReadOnlyList<CardController> hand)
         {
             if (hand == null || hand.Count == 0) return null;
 

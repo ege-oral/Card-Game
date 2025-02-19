@@ -5,6 +5,6 @@ namespace Cards.Services
 {
     public interface ISorting
     {
-        List<CardController> SortHand(List<CardController> hand);
+        List<CardController> SortHand(IReadOnlyList<CardController> hand);
     }
 }

@@ -24,7 +24,7 @@ namespace Cards.View
         
         public async UniTask PlayDrawAnimation(CardController card, int handSize, int maxHandSize)
         {
-            var t = (float)handSize / maxHandSize;
+            var t = (float)(handSize - 1) / Mathf.Max(1, maxHandSize - 1); // Ensures t starts from 0
             var handPosition = BezierUtility.GetPoint(cardAnimationControllerSo.startPoint.position,
                 cardAnimationControllerSo.controlPoint.position, cardAnimationControllerSo.endPoint.position, t);
             var getNextSortingOrder = _cardSortOrderService.GetNextSortingOrder();
@@ -47,7 +47,7 @@ namespace Cards.View
             {
                 var card = hand[i];
                 card.transform.rotation = Quaternion.Euler(new Vector3(0f, 0f, 0f));
-                var t = (float)(i + 1) / hand.Count;
+                var t = (float)i / Mathf.Max(1, hand.Count - 1);  
                 var handPosition = BezierUtility.GetPoint(cardAnimationControllerSo.startPoint.position,
                     cardAnimationControllerSo.controlPoint.position, cardAnimationControllerSo.endPoint.position, t);
                 var getNextSortingOrder = _cardSortOrderService.GetNextSortingOrder();

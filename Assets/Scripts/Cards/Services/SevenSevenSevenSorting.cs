@@ -10,7 +10,7 @@ namespace Cards.Services
         private readonly List<CardController> _priorityCards = new();
         private readonly List<CardController> _leftOverCards = new();
         
-        public List<CardController> SortHand(List<CardController> hand)
+        public List<CardController> SortHand(IReadOnlyList<CardController> hand)
         {
             if (hand == null || hand.Count == 0) return null;
 

@@ -19,6 +19,7 @@ namespace Installers
 
             Container.Bind<ISorting>().WithId("OneTwoThreeSorting").To<OneTwoThreeSorting>().AsSingle();
             Container.Bind<ISorting>().WithId("SevenSevenSevenSorting").To<SevenSevenSevenSorting>().AsSingle();
+            Container.Bind<ISorting>().WithId("SmartSorting").To<SmartSorting>().AsSingle();
             Container.BindInterfacesTo<CardSortingService>().AsSingle();
             Container.BindInterfacesTo<CardSortOrderService>().AsSingle();
             Container.Bind<CardRankComparer>().AsSingle();

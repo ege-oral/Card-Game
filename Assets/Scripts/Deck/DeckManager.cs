@@ -43,6 +43,28 @@ namespace Deck
             card = null;
             return false;
         }
+
+        public bool TryDrawSpecificCard(CardSuit cardSuit, int cardRank, out CardController card)
+        {
+            if (_deckList.Count <= 0)
+            {
+                card = null;
+                return false;
+            }
+
+            foreach (var cardController in _deckList)
+            {
+                if (cardController.CardData.Suit == cardSuit && cardController.CardData.Rank == cardRank)
+                {
+                    card = cardController;
+                    _deckList.Remove(cardController);
+                    return true;
+                }
+            }
+
+            card = null;
+            return false;
+        }
         
         private void GenerateOrderedCardList()
         {

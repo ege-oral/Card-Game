@@ -6,7 +6,7 @@ namespace Cards.Utils
 {
     public static class CardUtil
     {
-        public static Dictionary<CardSuit, List<CardController>> GroupCardsBySuit(List<CardController> hand)
+        public static Dictionary<CardSuit, List<CardController>> GroupCardsBySuit(IReadOnlyList<CardController> hand)
         {
             var cardSuitsToController = new Dictionary<CardSuit, List<CardController>>();
 
@@ -23,7 +23,7 @@ namespace Cards.Utils
             return cardSuitsToController;
         }
         
-        public static Dictionary<int, List<CardController>> GroupCardsByRank(List<CardController> hand)
+        public static Dictionary<int, List<CardController>> GroupCardsByRank(IReadOnlyList<CardController> hand)
         {
             var cardRanksToController = new Dictionary<int, List<CardController>>();
 
@@ -38,6 +38,29 @@ namespace Cards.Utils
             }
 
             return cardRanksToController;
+        }
+        
+        public static List<List<T>> GetCombinations<T>(List<T> list, int r)
+        {
+            var result = new List<List<T>>();
+            GenerateCombinations(list, new List<T>(), 0, r, result);
+            return result;
+        }
+
+        private static void GenerateCombinations<T>(List<T> list, List<T> temp, int start, int r, List<List<T>> result)
+        {
+            if (temp.Count == r)
+            {
+                result.Add(new List<T>(temp));
+                return;
+            }
+
+            for (var i = start; i < list.Count; i++)
+            {
+                temp.Add(list[i]);
+                GenerateCombinations(list, temp, i + 1, r, result);
+                temp.RemoveAt(temp.Count - 1);
+            }
         }
     }
 }

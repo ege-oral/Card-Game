@@ -833,7 +833,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerHand: {fileID: 1658775089}
-  maxHandSize: 25
+  maxHandSize: 11
   cardAnimationController: {fileID: 1772377525}
 --- !u!4 &968690084
 Transform:
@@ -1127,7 +1127,7 @@ MonoBehaviour:
   m_BlockingObjects: 0
   m_BlockingMask:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 55
 --- !u!114 &1670699266
 MonoBehaviour:
   m_ObjectHideFlags: 0
