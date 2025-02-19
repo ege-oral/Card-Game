@@ -12,7 +12,6 @@ namespace Installers
         [SerializeField] private GameObject cardPrefab;
         public override void InstallBindings()
         {
-            Container.Bind<Card>().AsTransient();
             Container.BindInterfacesTo<CardSortOrderService>().AsSingle();
             Container.Bind<DeckManager>().FromComponentInHierarchy().AsSingle();
             Container.BindFactory<CardController, CardControllerFactory>().FromComponentInNewPrefab(cardPrefab);
