@@ -22,5 +22,22 @@ namespace Cards.Utils
 
             return cardSuitsToController;
         }
+        
+        public static Dictionary<int, List<CardController>> GroupCardsByRank(List<CardController> hand)
+        {
+            var cardRanksToController = new Dictionary<int, List<CardController>>();
+
+            foreach (var card in hand)
+            {
+                if (cardRanksToController.TryGetValue(card.CardData.Rank, out var cardControllers) == false)
+                {
+                    cardControllers = new List<CardController>();
+                    cardRanksToController[card.CardData.Rank] = cardControllers;
+                }
+                cardControllers.Add(card);
+            }
+
+            return cardRanksToController;
+        }
     }
 }

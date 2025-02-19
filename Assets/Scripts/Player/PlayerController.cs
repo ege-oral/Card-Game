@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using Cards.Services;
 using Cards.View;
-using Cards.Utils;
 using Common;
 using Deck;
 using Sirenix.OdinInspector;
@@ -14,8 +13,8 @@ namespace Player
     public class PlayerController : MonoBehaviour
     {
         private DeckManager _deckManager;
+        private ICardSortingService _cardSortingService;
         private SignalBus _signalBus;
-        private readonly CardRankComparer _cardRankComparer = new();
 
         [SerializeField] private Transform playerHand;
         [SerializeField] private int maxHandSize = 11; // Maximum cards in hand
@@ -24,15 +23,22 @@ namespace Player
         // private List<CardController> _hand = new();
         private readonly ReactiveProperty<List<CardController>> _handTest = new();
         
-        private readonly List<CardController> _priorityCards = new();
-        private readonly List<CardController> _leftOverCards = new();
-        private readonly List<CardController> _cardSequence = new();
+        private ISorting _oneTwoThreeSorting;
+        private ISorting _sevenSevenSevenSorting;
+
 
         [Inject]
-        public void Construct(DeckManager deckManager, SignalBus signalBus)
+        public void Construct(DeckManager deckManager,
+            ICardSortingService cardSortingService,
+            SignalBus signalBus,
+            [Inject(Id = "OneTwoThreeSorting")] ISorting oneTwoThreeSorting,
+            [Inject(Id = "SevenSevenSevenSorting")] ISorting sevenSevenSevenSorting)
         {
             _deckManager = deckManager;
+            _cardSortingService = cardSortingService;
             _signalBus = signalBus;
+            _oneTwoThreeSorting = oneTwoThreeSorting;
+            _sevenSevenSevenSorting = sevenSevenSevenSorting;
             _handTest.Value = new List<CardController>();
             _handTest.ValueChanged += TestMethod;
         }
@@ -80,9 +86,9 @@ namespace Player
         }
         
         [Button]
-        public void DrawNumberOfCardsWithEffects(int drawCount)
+        public void DrawMaxNumberCardsWithEffects()
         {
-            for (var i = 0; i < drawCount; ++i)
+            for (var i = 0; i < maxHandSize; ++i)
             {
                 if (_handTest.Value.Count >= maxHandSize) return;
                 if (_deckManager.TryDrawCard(out var card) == false) return;
@@ -101,65 +107,17 @@ namespace Player
         [Button]
         public void OneTwoThreeOrder()
         {
-            _priorityCards.Clear();
-            _leftOverCards.Clear();
-
-            var cardSuitsToController = CardUtil.GroupCardsBySuit(_handTest.Value);
-            foreach (var cardControllers in cardSuitsToController.Values)
-            {
-                if (cardControllers.Count < 3)
-                {
-                    _leftOverCards.AddRange(cardControllers);
-                    continue;
-                }
-
-                _cardSequence.Clear();
-                cardControllers.Sort(_cardRankComparer); // Sort cards within the same suit by rank
-
-                for (var i = 0; i < cardControllers.Count - 1; i++) 
-                {
-                    var currentCard = cardControllers[i];
-                    var nextCard = cardControllers[i + 1];
-
-                    _cardSequence.Add(currentCard);
-
-                    var isConsecutive = currentCard.CardData.Rank == nextCard.CardData.Rank - 1;
-                    if (isConsecutive == false)
-                    {
-                        StoreSequence(_cardSequence);
-                        _cardSequence.Clear();    
-                    }
-                }
-
-                // Handle the last Sequence
-                if (_cardSequence.Count > 0)
-                {
-                    _cardSequence.Add(cardControllers[^1]); // Add last consecutive card in sequence
-                    StoreSequence(_cardSequence);
-                }
-                else
-                {
-                    _leftOverCards.Add(cardControllers[^1]); // Store last left-over card if no sequence exists
-                }
-            }
-
-            _priorityCards.AddRange(_leftOverCards);
-            _handTest.Value = _priorityCards.ToList();
+            var sortHandByOneTwoThree = _cardSortingService.SortHandByRule(_handTest.Value, _oneTwoThreeSorting);
+            _handTest.Value = sortHandByOneTwoThree;
             cardAnimationController.ReArrangeHand(_handTest.Value);
         }
         
-        
-        private void StoreSequence(List<CardController> cardSequence)
+        [Button]
+        public void SevenSevenSevenOrder()
         {
-            if (cardSequence.Count >= 3)
-            {
-                _priorityCards.AddRange(cardSequence);
-            }
-            else
-            {
-                _leftOverCards.AddRange(cardSequence);
-            }
+            var sortHandByOneTwoThree = _cardSortingService.SortHandByRule(_handTest.Value, _sevenSevenSevenSorting);
+            _handTest.Value = sortHandByOneTwoThree;
+            cardAnimationController.ReArrangeHand(_handTest.Value);
         }
-        
     }
 }
