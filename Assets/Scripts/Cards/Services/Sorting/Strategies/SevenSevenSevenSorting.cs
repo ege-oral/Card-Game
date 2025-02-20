@@ -30,7 +30,8 @@ namespace Cards.Services.Sorting.Strategies
                     _leftOverCards.AddRange(cardControllers);
                 }
             }
-            return _priorityCards.Concat(_leftOverCards).ToList();
+
+            return _priorityCards.Count == 0 ? hand.ToList() : _priorityCards.Concat(_leftOverCards).ToList();
         }
     }
 }

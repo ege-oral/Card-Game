@@ -5,7 +5,7 @@ namespace Cards.Services.Sorting.Base
 {
     public class CardSortingService : ICardSortingService
     {
-        public List<CardController> SortHandByRule(List<CardController> hand, ISorting sortingMethod)
+        public List<CardController> SortHandByRule(IReadOnlyList<CardController> hand, ISorting sortingMethod)
         {
             return sortingMethod.SortHand(hand);
         }

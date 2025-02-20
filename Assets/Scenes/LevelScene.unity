@@ -151,6 +151,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 359df9c7df884c689dc1920ab8ddd65e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerController: {fileID: 968690083}
 --- !u!4 &142942507
 Transform:
   m_ObjectHideFlags: 0
@@ -512,7 +513,7 @@ Transform:
   m_GameObject: {fileID: 653871103}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 5, y: -3, z: 0}
+  m_LocalPosition: {x: 6, y: -3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -713,7 +714,7 @@ Transform:
   m_GameObject: {fileID: 951896836}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: -1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -915,7 +916,7 @@ MonoBehaviour:
   controlPoint: {fileID: 951896837}
   endPoint: {fileID: 653871104}
   segmentCount: 50
-  curveColor: {r: 0, g: 1, b: 0, a: 1}
+  curveColor: {r: 0, g: 1, b: 0, a: 0}
 --- !u!4 &1140375830
 Transform:
   m_ObjectHideFlags: 0
@@ -1003,7 +1004,7 @@ Transform:
   m_GameObject: {fileID: 1637571673}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -5, y: -3, z: 0}
+  m_LocalPosition: {x: -6, y: -3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

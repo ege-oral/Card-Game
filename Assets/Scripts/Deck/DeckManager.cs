@@ -14,9 +14,7 @@ namespace Deck
         [SerializeField] private CardDataConfig cardDataConfig;
         
         private CardControllerFactory _cardFactory;
-        
         private readonly List<CardController> _deckList = new();
-        private readonly Stack<CardController> _deckStack = new();
         private const float CardOffset = 0.015f;
 
         [Inject]
@@ -27,16 +25,17 @@ namespace Deck
 
         private void Start()
         {
-            GenerateOrderedCardList();
-            ShuffleCardList();
-            GenerateRandomStackDeck();
+            var orderedCardList = GenerateOrderedCardList();
+            var shuffleCardList = ShuffleCardList(orderedCardList);
+            ArrangeDeckVisually(shuffleCardList);
         }
         
         public bool TryDrawCard(out CardController card)
         {
-            if (_deckStack.Count > 0)
+            if (_deckList.Count > 0)
             {
-                card = _deckStack.Pop();
+                card = _deckList[^1]; // Get the last card
+                _deckList.RemoveAt(_deckList.Count - 1);
                 return true;
             }
 
@@ -46,18 +45,12 @@ namespace Deck
 
         public bool TryDrawSpecificCard(CardSuit cardSuit, int cardRank, out CardController card)
         {
-            if (_deckList.Count <= 0)
+            for (var i = 0; i < _deckList.Count; i++)
             {
-                card = null;
-                return false;
-            }
-
-            foreach (var cardController in _deckList)
-            {
-                if (cardController.CardData.Suit == cardSuit && cardController.CardData.Rank == cardRank)
+                if (_deckList[i].CardData.Suit == cardSuit && _deckList[i].CardData.Rank == cardRank)
                 {
-                    card = cardController;
-                    _deckList.Remove(cardController);
+                    card = _deckList[i];
+                    _deckList.RemoveAt(i);
                     return true;
                 }
             }
@@ -66,7 +59,7 @@ namespace Deck
             return false;
         }
         
-        private void GenerateOrderedCardList()
+        private List<CardController> GenerateOrderedCardList()
         {
             _deckList.Clear();
             
@@ -81,32 +74,35 @@ namespace Deck
                     _deckList.Add(card);
                 }
             }
+
+            return _deckList;
         }
         
-        private void ShuffleCardList()
+        private List<CardController> ShuffleCardList(List<CardController> deckList)
         {
-            if (_deckList.Count <= 1) return;
-
-            for (var i = _deckList.Count - 1; i > 0; i--)
+            for (var i = deckList.Count - 1; i > 0; i--)
             {
                 var randomIndex = Random.Range(0, i + 1);
-                (_deckList[i], _deckList[randomIndex]) = (_deckList[randomIndex], _deckList[i]);
+                (deckList[i], deckList[randomIndex]) = (deckList[randomIndex], deckList[i]);
             }
+
+            return deckList;
         }
         
-        private void GenerateRandomStackDeck()
+        private void ArrangeDeckVisually(List<CardController> deckList)
         {
-            _deckStack.Clear();
-            for (var i = 0; i < _deckList.Count; i++)
+            for (var i = 0; i < deckList.Count; i++)
             {
-                var card = _deckList[i];
-                
+                var card = deckList[i];
                 card.transform.SetParent(deckParent, worldPositionStays: false);
                 card.transform.rotation = Quaternion.Euler(-120, 0, 0);
                 card.transform.position = deckParent.position + Vector3.up * (CardOffset * i);
-
-                _deckStack.Push(card);
             }
+        }
+
+        public List<CardController> GetDeckList()
+        {
+            return _deckList;
         }
     }
 }

@@ -65,7 +65,7 @@ namespace Cards.Services.Sorting.Strategies
                 }
             }
 
-            return _priorityCards.Concat(_leftOverCards).ToList();
+            return _priorityCards.Count == 0 ? hand.ToList() : _priorityCards.Concat(_leftOverCards).ToList();
         }
         
         private void StoreSequence()

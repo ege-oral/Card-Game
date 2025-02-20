@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using UnityEngine;
 using Cards.View;
+using Player;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.EnhancedTouch;
 
@@ -7,12 +9,25 @@ namespace Input
 {
     public class InputHandler : MonoBehaviour
     {
+        [SerializeField] private PlayerController playerController;
         private Camera _mainCamera;
         private GameInput _gameInput;
         private CardController _selectedCard;
-        
+
         private bool _isDragging;
-        
+        private Vector2 _previousInputPosition;
+
+        private IReadOnlyList<CardController> _hand;
+
+
+        private CardController _currentLeft;
+        private CardController _previousLeft;
+
+        private CardController _currentRight;
+        private CardController _previousRight;
+
+        private const string SelectedCardSortingLayerName = "SelectedCard";
+
         private void Awake()
         {
             _mainCamera = Camera.main;
@@ -21,6 +36,7 @@ namespace Input
             _gameInput.Player.Click.started += TryDragging;
             _gameInput.Player.Click.canceled += StopDragging;
         }
+
         private void OnEnable()
         {
             _gameInput.Enable();
@@ -32,13 +48,44 @@ namespace Input
             _gameInput.Disable();
             EnhancedTouchSupport.Disable();
         }
-        
+
         private void Update()
         {
-            if (_isDragging == false || _selectedCard is null) return;
+            if (!_isDragging || _selectedCard == null) return;
 
             var inputPosition = _gameInput.Player.Position.ReadValue<Vector2>();
             _selectedCard.transform.position = GetMouseWorldPosition(inputPosition);
+            HighlightCard(_selectedCard, null, 0);
+
+            UpdateNearestObjects();
+            UpdateHighlighting();
+
+            _previousInputPosition = inputPosition;
+        }
+        
+        private void UpdateNearestObjects()
+        {
+            (_currentLeft, _currentRight) = GetNearestLeftAndRight(_selectedCard, _hand);
+        }
+        
+        private void UpdateHighlighting()
+        {
+            var dragDirection = IsDraggingRight(_selectedCard.transform.position) ? 1 : -1;
+
+            HighlightCard(_currentLeft, _previousLeft, dragDirection);
+            _previousLeft = _currentLeft;
+
+            HighlightCard(_currentRight, _previousRight, -dragDirection);
+            _previousRight = _currentRight;
+        }
+        
+        private void HighlightCard(CardController current, CardController previous, int direction)
+        {
+            if (current != null)
+                current.Highlight(direction, SelectedCardSortingLayerName);
+
+            if (previous != null && previous != current)
+                previous.DeHighlight();
         }
 
         private void TryDragging(InputAction.CallbackContext _)
@@ -49,7 +96,7 @@ namespace Input
             if (TryGetCardAtPosition(worldPosition, out _selectedCard))
             {
                 _isDragging = true;
-                _selectedCard.UpdateSorting(0, "SelectedCard");
+                _hand = playerController.GetHand();
             }
         }
 
@@ -87,6 +134,49 @@ namespace Input
         {
             _gameInput.Player.Click.started -= TryDragging;
             _gameInput.Player.Click.canceled -= StopDragging;
+        }
+
+        private bool IsDraggingRight(Vector2 currentPosition)
+        {
+            var isDraggingRight = currentPosition.x > _previousInputPosition.x;
+            return isDraggingRight;
+        }
+
+        private (CardController left, CardController right) GetNearestLeftAndRight(CardController reference, IReadOnlyList<CardController> cards, float maxDistance = 3f)
+        {
+            if (cards == null || cards.Count == 0) return (null, null);
+
+            CardController nearestLeft = null, nearestRight = null;
+            float nearestLeftDist = float.MaxValue, nearestRightDist = float.MaxValue;
+
+            foreach (var card in cards)
+            {
+                if (card == reference) continue; // Skip the reference card
+
+                var distance = Vector3.Distance(reference.transform.position, card.transform.position);
+                if (distance > maxDistance) continue; // Ignore cards beyond the max distance
+
+                var isOnRight = IsObjectOnRight(reference.transform, card.transform);
+
+                if (isOnRight && distance < nearestRightDist)
+                {
+                    nearestRight = card;
+                    nearestRightDist = distance;
+                }
+                else if (isOnRight == false && distance < nearestLeftDist)
+                {
+                    nearestLeft = card;
+                    nearestLeftDist = distance;
+                }
+            }
+
+            return (nearestLeft, nearestRight);
+        }
+        
+        private bool IsObjectOnRight(Transform reference, Transform target)
+        {
+            var directionToTarget = (target.position - reference.position).normalized;
+            return Vector3.Dot(reference.right, directionToTarget) > 0;
         }
     }
 }

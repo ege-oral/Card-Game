@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Cards.Data;
-using Cards.Services;
-using Cards.Services.Sorting;
 using Cards.Services.Sorting.Base;
 using Cards.View;
 using Common;
@@ -162,6 +160,11 @@ namespace Player
             var sortHandBySmart = _cardSortingService.SortHandByRule(_handTest.Value, _smartSorting);
             _handTest.Value = sortHandBySmart;
             cardAnimationController.ReArrangeHand(_handTest.Value);
+        }
+
+        public List<CardController> GetHand()
+        {
+            return _handTest.Value;
         }
     }
 }

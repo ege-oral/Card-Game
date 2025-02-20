@@ -23,6 +23,7 @@ namespace Cards.Services.Combinations.Optimization
                 }
             }
 
+            lowestValue = lowestValue == int.MaxValue ? hand.Sum(card => card.CardData.Value) : lowestValue; // If no combination was found, return the full hand value
             Debug.Log($"Lowest remaining value: {lowestValue}");
             return _bestCombination;
         }

@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using BezierCurve;
-using Cards.Services;
 using Cards.View.Services;
 using Cysharp.Threading.Tasks;
 using DG.Tweening;
@@ -23,43 +22,61 @@ namespace Cards.View
             _cardSortOrderService = cardSortOrderService;
         }
         
-        public async UniTask PlayDrawAnimation(CardController card, int handSize, int maxHandSize)
+        public async UniTask PlayDrawAnimation(CardController card, int currentHandSize, int maxHandSize)
         {
-            var t = (float)(handSize - 1) / Mathf.Max(1, maxHandSize - 1); // Ensures t starts from 0
-            var handPosition = BezierUtility.GetPoint(cardAnimationControllerSo.startPoint,
-                cardAnimationControllerSo.controlPoint, cardAnimationControllerSo.endPoint, t);
-            var getNextSortingOrder = _cardSortOrderService.GetNextSortingOrder();
-            var zRotation = Mathf.Lerp(cardAnimationControllerSo.zRotationRange, -cardAnimationControllerSo.zRotationRange, t);
-            card.UpdateSorting(getNextSortingOrder);
+            var t = CalculateNormalizedPosition(currentHandSize, maxHandSize);
+            var handPosition = GetHandPosition(t);
+            var zRotation = GetRotationAngle(t);
+
+            card.UpdateSorting(_cardSortOrderService.GetNextSortingOrder());
             
-            var sequence = DOTween.Sequence();
-            sequence.Join(card.transform.DOMove(cardAnimationControllerSo.controlPoint, cardAnimationControllerSo.drawSpeed));
-            sequence.Join(card.transform.DORotate(new Vector3(0f, 0f, 0f), cardAnimationControllerSo.drawSpeed));
-            await sequence.AsyncWaitForCompletion();
-            
-            sequence = DOTween.Sequence();
-            sequence.Append(card.transform.DOMove(handPosition, cardAnimationControllerSo.drawSpeed));
-            sequence.Join(card.transform.DORotate(new Vector3(0f, 0f, zRotation), cardAnimationControllerSo.drawSpeed));
+            // First phase: Move to control point
+            await AnimateCard(card, cardAnimationControllerSo.controlPoint, Vector3.zero);
+
+            // Second phase: Move to hand position
+            await AnimateCard(card, handPosition, new Vector3(0f, 0f, zRotation));
         }
         
-        public void ReArrangeHand(List<CardController> hand)
+        public void ReArrangeHand(IReadOnlyList<CardController> hand)
         {
             for (var i = 0; i < hand.Count; i++)
             {
                 var card = hand[i];
-                card.transform.rotation = Quaternion.Euler(new Vector3(0f, 0f, 0f));
-                var t = (float)i / Mathf.Max(1, hand.Count - 1);  
-                var handPosition = BezierUtility.GetPoint(cardAnimationControllerSo.startPoint,
-                    cardAnimationControllerSo.controlPoint, cardAnimationControllerSo.endPoint, t);
-                var getNextSortingOrder = _cardSortOrderService.GetNextSortingOrder();
-                var zRotation = Mathf.Lerp(cardAnimationControllerSo.zRotationRange, -cardAnimationControllerSo.zRotationRange, t);
-                card.UpdateSorting(getNextSortingOrder);
-                var sequence = DOTween.Sequence();
-                sequence.Append(card.transform.DOMove(handPosition, cardAnimationControllerSo.drawSpeed));
-                sequence.Join(card.transform.DORotate(new Vector3(0f, 0f, zRotation), cardAnimationControllerSo.drawSpeed));
+                var t = CalculateNormalizedPosition(i + 1, hand.Count);
+                var handPosition = GetHandPosition(t);
+                var zRotation = GetRotationAngle(t);
 
+                card.UpdateSorting(_cardSortOrderService.GetNextSortingOrder());
+                AnimateCard(card, handPosition, new Vector3(0f, 0f, zRotation));
             }
-            
+        }
+        
+        private UniTask AnimateCard(CardController card, Vector3 position, Vector3 rotation)
+        {
+            return DOTween.Sequence()
+                .Join(card.transform.DOMove(position, cardAnimationControllerSo.drawSpeed))
+                .Join(card.transform.DORotate(rotation, cardAnimationControllerSo.drawSpeed))
+                .AsyncWaitForCompletion().AsUniTask();
+        }
+        
+        private float CalculateNormalizedPosition(int currentHandSize, int maxHandSize)
+        {
+            return (float)(currentHandSize - 1) / Mathf.Max(1, maxHandSize - 1); // Ensures t starts from 0
+        }
+        
+        private Vector3 GetHandPosition(float t)
+        {
+            return BezierUtility.GetPoint(
+                cardAnimationControllerSo.startPoint,
+                cardAnimationControllerSo.controlPoint,
+                cardAnimationControllerSo.endPoint,
+                t
+            );
+        }
+        
+        private float GetRotationAngle(float t)
+        {
+            return Mathf.Lerp(cardAnimationControllerSo.zRotationRange, -cardAnimationControllerSo.zRotationRange, t);
         }
     }
 }
