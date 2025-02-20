@@ -1,9 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
+using Cards.Services.Sorting.Base;
 using Cards.Utils;
 using Cards.View;
 
-namespace Cards.Services
+namespace Cards.Services.Sorting.Strategies
 {
     public class SevenSevenSevenSorting : ISorting
     {

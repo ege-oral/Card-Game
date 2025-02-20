@@ -1,7 +1,15 @@
 using Cards.View;
 using Cards.Factory;
 using Cards.Services;
+using Cards.Services.Combination;
+using Cards.Services.Combinations.Combination;
+using Cards.Services.Combinations.Optimization;
+using Cards.Services.Combinations.Validation;
+using Cards.Services.Sorting;
+using Cards.Services.Sorting.Base;
+using Cards.Services.Sorting.Strategies;
 using Cards.Utils;
+using Cards.View.Services;
 using Deck;
 using UnityEngine;
 using Zenject;
@@ -22,6 +30,9 @@ namespace Installers
             Container.Bind<ISorting>().WithId("SmartSorting").To<SmartSorting>().AsSingle();
             Container.BindInterfacesTo<CardSortingService>().AsSingle();
             Container.BindInterfacesTo<CardSortOrderService>().AsSingle();
+            Container.BindInterfacesTo<CardCombinationsService>().AsSingle();
+            Container.BindInterfacesTo<CardCombinationValidatorService>().AsSingle();
+            Container.BindInterfacesTo<CardCombinationOptimizerService>().AsSingle();
             Container.Bind<CardRankComparer>().AsSingle();
         }
     }

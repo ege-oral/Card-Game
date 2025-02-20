@@ -6,9 +6,9 @@ namespace Cards.View
     public class CardAnimationControllerSo : ScriptableObject
     {
         [Header("Bezier Control Points")]
-        [SerializeField] public Transform startPoint;   // The starting position (Deck area)
-        [SerializeField] public Transform controlPoint; // The Bezier curve control point
-        [SerializeField] public Transform endPoint;     // The final hand position
+        [SerializeField] public Vector3 startPoint;   // The starting position (Deck area)
+        [SerializeField] public Vector3 controlPoint; // The Bezier curve control point
+        [SerializeField] public Vector3 endPoint;     // The final hand position
         
         [Header("Card Settings")]
         [SerializeField] public float drawSpeed = 0.5f;

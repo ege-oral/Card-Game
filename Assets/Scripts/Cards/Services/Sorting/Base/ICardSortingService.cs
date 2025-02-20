@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Cards.View;
 
-namespace Cards.Services
+namespace Cards.Services.Sorting.Base
 {
     public interface ICardSortingService
     { 

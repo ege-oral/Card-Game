@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 85e2dcd5378643cca1071444d105aac8, type: 3}
   m_Name: CardAnimationControllerSo
   m_EditorClassIdentifier: 
-  startPoint: {fileID: 0}
-  controlPoint: {fileID: 0}
-  endPoint: {fileID: 0}
+  startPoint: {x: -5, y: -3, z: 0}
+  controlPoint: {x: 0, y: 0, z: 0}
+  endPoint: {x: 5, y: -3, z: 0}
   drawSpeed: 0.5
   zRotationRange: 30

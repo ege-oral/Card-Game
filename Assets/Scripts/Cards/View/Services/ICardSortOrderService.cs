@@ -1,4 +1,4 @@
-namespace Cards.Services
+namespace Cards.View.Services
 {
     public interface ICardSortOrderService
     {
