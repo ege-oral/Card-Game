@@ -10,6 +10,8 @@ namespace Input
     public class InputHandler : MonoBehaviour
     {
         [SerializeField] private PlayerController playerController;
+        [SerializeField] private CardAnimationControllerSo cardAnimationControllerSo; // todo: for testing remove this 
+        
         private Camera _mainCamera;
         private GameInput _gameInput;
         private CardController _selectedCard;
@@ -51,10 +53,14 @@ namespace Input
 
         private void Update()
         {
-            if (!_isDragging || _selectedCard == null) return;
+            if (_isDragging == false || _selectedCard == null) return;
 
             var inputPosition = _gameInput.Player.Position.ReadValue<Vector2>();
             _selectedCard.transform.position = GetMouseWorldPosition(inputPosition);
+            
+            var normalized = Mathf.InverseLerp(cardAnimationControllerSo.startPoint.x, cardAnimationControllerSo.endPoint.x, _selectedCard.transform.position.x);
+            _selectedCard.transform.rotation = Quaternion.Euler(0, 0, GetRotationAngle(normalized));
+            Debug.Log(normalized);
             HighlightCard(_selectedCard, null, 0);
 
             UpdateNearestObjects();
@@ -96,7 +102,9 @@ namespace Input
             if (TryGetCardAtPosition(worldPosition, out _selectedCard))
             {
                 _isDragging = true;
-                _hand = playerController.GetHand();
+                var playerHand = playerController.GetHand();
+                playerHand.Remove(_selectedCard);
+                _hand = playerHand.Items;
             }
         }
 
@@ -104,7 +112,27 @@ namespace Input
         {
             if (_selectedCard != null)
             {
-                _selectedCard.UpdateSorting(0);
+                var playerHand = playerController.GetHand();
+
+                for (var i = 0; i < _hand.Count; i++)
+                {
+                    if (_hand[i] == _currentLeft)
+                    {
+                        playerHand.Insert(i + 1, _selectedCard);
+                        break;
+                    }
+            
+                    if (_hand[i] == _currentRight)
+                    {
+                        var insertIndex = Mathf.Max(0, i);
+                        playerHand.Insert(insertIndex, _selectedCard);
+                        break;
+                    }
+                }
+
+                _currentLeft?.DeHighlight();
+                _currentRight?.DeHighlight();
+                _selectedCard.DeHighlight();
                 _selectedCard = null;
             }
 
@@ -177,6 +205,11 @@ namespace Input
         {
             var directionToTarget = (target.position - reference.position).normalized;
             return Vector3.Dot(reference.right, directionToTarget) > 0;
+        }
+        
+        private float GetRotationAngle(float t)
+        {
+            return Mathf.Lerp(cardAnimationControllerSo.zRotationRange, -cardAnimationControllerSo.zRotationRange, t);
         }
     }
 }

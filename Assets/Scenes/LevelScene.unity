@@ -152,6 +152,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerController: {fileID: 968690083}
+  cardAnimationControllerSo: {fileID: 11400000, guid: a103bdb710fa54fa0a7656fd173ec127,
+    type: 2}
 --- !u!4 &142942507
 Transform:
   m_ObjectHideFlags: 0
