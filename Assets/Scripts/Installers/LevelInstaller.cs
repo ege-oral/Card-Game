@@ -31,6 +31,8 @@ namespace Installers
             Container.BindInterfacesTo<CardCombinationValidatorService>().AsSingle();
             Container.BindInterfacesTo<CardCombinationOptimizerService>().AsSingle();
             Container.Bind<CardRankComparer>().AsSingle();
+            Container.Bind<CardHighlighter>().AsSingle();
+            Container.Bind<CardNeighborFinder>().AsSingle();
         }
     }
 }

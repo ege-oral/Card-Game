@@ -4,23 +4,22 @@ using Cards.View;
 using Player;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.EnhancedTouch;
+using Zenject;
 
 namespace Input
 {
     public class InputHandler : MonoBehaviour
     {
         [SerializeField] private PlayerController playerController;
-        [SerializeField] private CardAnimationControllerSo cardAnimationControllerSo; // todo: for testing remove this 
-        
+        [SerializeField] private CardAnimationControllerSo cardAnimationControllerSo;
+
         private Camera _mainCamera;
         private GameInput _gameInput;
         private CardController _selectedCard;
 
         private bool _isDragging;
         private Vector2 _previousInputPosition;
-
         private IReadOnlyList<CardController> _hand;
-
 
         private CardController _currentLeft;
         private CardController _previousLeft;
@@ -28,8 +27,16 @@ namespace Input
         private CardController _currentRight;
         private CardController _previousRight;
 
-        private const string SelectedCardSortingLayerName = "SelectedCard";
+        private CardHighlighter _cardHighlighter;
+        private CardNeighborFinder _neighborFinder;
 
+        [Inject]
+        public void Construct(CardHighlighter cardHighlighter, CardNeighborFinder neighborFinder)
+        {
+            _cardHighlighter = cardHighlighter;
+            _neighborFinder = neighborFinder;
+        }
+        
         private void Awake()
         {
             _mainCamera = Camera.main;
@@ -57,41 +64,27 @@ namespace Input
 
             var inputPosition = _gameInput.Player.Position.ReadValue<Vector2>();
             _selectedCard.transform.position = GetMouseWorldPosition(inputPosition);
+
+            var normalized = Mathf.InverseLerp(cardAnimationControllerSo.startPoint.x,
+                cardAnimationControllerSo.endPoint.x, _selectedCard.transform.position.x);
             
-            var normalized = Mathf.InverseLerp(cardAnimationControllerSo.startPoint.x, cardAnimationControllerSo.endPoint.x, _selectedCard.transform.position.x);
             _selectedCard.transform.rotation = Quaternion.Euler(0, 0, GetRotationAngle(normalized));
-            Debug.Log(normalized);
-            HighlightCard(_selectedCard, null, 0);
 
             UpdateNearestObjects();
             UpdateHighlighting();
-
+            
             _previousInputPosition = inputPosition;
         }
-        
+
         private void UpdateNearestObjects()
         {
-            (_currentLeft, _currentRight) = GetNearestLeftAndRight(_selectedCard, _hand);
+            (_currentLeft, _currentRight) = _neighborFinder.GetNearestLeftAndRight(_selectedCard, _hand);
         }
-        
+
         private void UpdateHighlighting()
         {
-            var dragDirection = IsDraggingRight(_selectedCard.transform.position) ? 1 : -1;
-
-            HighlightCard(_currentLeft, _previousLeft, dragDirection);
-            _previousLeft = _currentLeft;
-
-            HighlightCard(_currentRight, _previousRight, -dragDirection);
-            _previousRight = _currentRight;
-        }
-        
-        private void HighlightCard(CardController current, CardController previous, int direction)
-        {
-            if (current != null)
-                current.Highlight(direction, SelectedCardSortingLayerName);
-
-            if (previous != null && previous != current)
-                previous.DeHighlight();
+            _cardHighlighter.UpdateHighlighting(_selectedCard, ref _previousLeft, _currentLeft, ref _previousRight,
+                _currentRight, _previousInputPosition);
         }
 
         private void TryDragging(InputAction.CallbackContext _)
@@ -110,39 +103,35 @@ namespace Input
 
         private void StopDragging(InputAction.CallbackContext _)
         {
-            if (_selectedCard != null)
+            if (_selectedCard == null) return;
+
+            var playerHand = playerController.GetHand();
+            var insertIndex = DetermineInsertIndex();
+
+            playerHand.Insert(insertIndex, _selectedCard);
+    
+            _cardHighlighter.ClearAllHighlights(_currentLeft, _currentRight, _selectedCard);
+            _selectedCard = null;
+            _isDragging = false;
+        }
+
+        private int DetermineInsertIndex()
+        {
+            for (var i = 0; i < _hand.Count; i++)
             {
-                var playerHand = playerController.GetHand();
+                if (_hand[i] == _currentLeft)
+                    return i + 1;
 
-                for (var i = 0; i < _hand.Count; i++)
-                {
-                    if (_hand[i] == _currentLeft)
-                    {
-                        playerHand.Insert(i + 1, _selectedCard);
-                        break;
-                    }
-            
-                    if (_hand[i] == _currentRight)
-                    {
-                        var insertIndex = Mathf.Max(0, i);
-                        playerHand.Insert(insertIndex, _selectedCard);
-                        break;
-                    }
-                }
-
-                _currentLeft?.DeHighlight();
-                _currentRight?.DeHighlight();
-                _selectedCard.DeHighlight();
-                _selectedCard = null;
+                if (_hand[i] == _currentRight)
+                    return Mathf.Max(0, i);
             }
 
-            _isDragging = false;
+            return 0; // Insert at the beginning if no left/right match
         }
 
         private Vector2 GetMouseWorldPosition(Vector2 inputPosition)
         {
-            return _mainCamera.ScreenToWorldPoint(
-                new Vector3(inputPosition.x, inputPosition.y, _mainCamera.transform.position.z * -1));
+            return _mainCamera.ScreenToWorldPoint(new Vector3(inputPosition.x, inputPosition.y, _mainCamera.transform.position.z * -1));
         }
 
         private bool TryGetCardAtPosition(Vector2 position, out CardController cardController)
@@ -158,55 +147,6 @@ namespace Input
             return false;
         }
 
-        private void OnDestroy()
-        {
-            _gameInput.Player.Click.started -= TryDragging;
-            _gameInput.Player.Click.canceled -= StopDragging;
-        }
-
-        private bool IsDraggingRight(Vector2 currentPosition)
-        {
-            var isDraggingRight = currentPosition.x > _previousInputPosition.x;
-            return isDraggingRight;
-        }
-
-        private (CardController left, CardController right) GetNearestLeftAndRight(CardController reference, IReadOnlyList<CardController> cards, float maxDistance = 3f)
-        {
-            if (cards == null || cards.Count == 0) return (null, null);
-
-            CardController nearestLeft = null, nearestRight = null;
-            float nearestLeftDist = float.MaxValue, nearestRightDist = float.MaxValue;
-
-            foreach (var card in cards)
-            {
-                if (card == reference) continue; // Skip the reference card
-
-                var distance = Vector3.Distance(reference.transform.position, card.transform.position);
-                if (distance > maxDistance) continue; // Ignore cards beyond the max distance
-
-                var isOnRight = IsObjectOnRight(reference.transform, card.transform);
-
-                if (isOnRight && distance < nearestRightDist)
-                {
-                    nearestRight = card;
-                    nearestRightDist = distance;
-                }
-                else if (isOnRight == false && distance < nearestLeftDist)
-                {
-                    nearestLeft = card;
-                    nearestLeftDist = distance;
-                }
-            }
-
-            return (nearestLeft, nearestRight);
-        }
-        
-        private bool IsObjectOnRight(Transform reference, Transform target)
-        {
-            var directionToTarget = (target.position - reference.position).normalized;
-            return Vector3.Dot(reference.right, directionToTarget) > 0;
-        }
-        
         private float GetRotationAngle(float t)
         {
             return Mathf.Lerp(cardAnimationControllerSo.zRotationRange, -cardAnimationControllerSo.zRotationRange, t);
