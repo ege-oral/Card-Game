@@ -152,8 +152,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerController: {fileID: 968690083}
-  cardAnimationControllerSo: {fileID: 11400000, guid: a103bdb710fa54fa0a7656fd173ec127,
-    type: 2}
 --- !u!4 &142942507
 Transform:
   m_ObjectHideFlags: 0
@@ -980,6 +978,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cardPrefab: {fileID: 7096804898732956308, guid: 5adb556cecba241b28dbacdb02d0886d,
     type: 3}
+  cardAnimationControllerSo: {fileID: 11400000, guid: a103bdb710fa54fa0a7656fd173ec127,
+    type: 2}
 --- !u!1 &1637571673
 GameObject:
   m_ObjectHideFlags: 0

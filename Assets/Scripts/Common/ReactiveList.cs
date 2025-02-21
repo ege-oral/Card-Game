@@ -60,6 +60,6 @@ namespace Common
 
         public int Count => _items.Count;
 
-        public T this[int index] => _items[index]; // Indexer for easy access
+        public T this[int index] => _items[index];
     }
 }

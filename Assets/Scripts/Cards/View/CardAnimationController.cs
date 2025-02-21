@@ -26,7 +26,7 @@ namespace Cards.View
         {
             var t = CalculateNormalizedPosition(currentHandSize, maxHandSize);
             var handPosition = GetHandPosition(t);
-            var zRotation = GetRotationAngle(t);
+            var zRotation = cardAnimationControllerSo.GetRotationAngle(t);
 
             card.UpdateSorting(_cardSortOrderService.GetNextSortingOrder());
             
@@ -44,7 +44,7 @@ namespace Cards.View
                 var card = hand[i];
                 var t = CalculateNormalizedPosition(i + 1, hand.Count);
                 var handPosition = GetHandPosition(t);
-                var zRotation = GetRotationAngle(t);
+                var zRotation = cardAnimationControllerSo.GetRotationAngle(t);
 
                 card.UpdateSorting(_cardSortOrderService.GetNextSortingOrder());
                 AnimateCard(card, handPosition, new Vector3(0f, 0f, zRotation));
@@ -72,11 +72,6 @@ namespace Cards.View
                 cardAnimationControllerSo.endPoint,
                 t
             );
-        }
-        
-        private float GetRotationAngle(float t)
-        {
-            return Mathf.Lerp(cardAnimationControllerSo.zRotationRange, -cardAnimationControllerSo.zRotationRange, t);
         }
     }
 }

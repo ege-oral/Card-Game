@@ -5,7 +5,8 @@ namespace Cards.View
 {
     public class CardNeighborFinder
     {
-        public (CardController left, CardController right) GetNearestLeftAndRight(CardController reference, IReadOnlyList<CardController> cards, float maxDistance = 3f)
+        public (CardController left, CardController right) GetNearestLeftAndRight(CardController reference,
+            IReadOnlyList<CardController> cards, float maxDistance)
         {
             if (cards == null || cards.Count == 0) return (null, null);
 

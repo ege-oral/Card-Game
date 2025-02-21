@@ -50,7 +50,6 @@ namespace Player
         private void ReArrange(CardController arg1, int arg2)
         {
             cardAnimationController.ReArrangeHand(_playerHand.Items);
-
         }
         
         private void ReArrange(object _)
@@ -70,7 +69,6 @@ namespace Player
             }
         }
 
-       
         
         [Button]
         public void DrawACard()
