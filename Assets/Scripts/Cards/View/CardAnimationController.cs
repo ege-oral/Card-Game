@@ -50,6 +50,11 @@ namespace Cards.View
                 AnimateCard(card, handPosition, new Vector3(0f, 0f, zRotation));
             }
         }
+
+        public float GetCardDrawDelay()
+        {
+            return cardAnimationControllerSo.cardDrawDelay;
+        }
         
         private UniTask AnimateCard(CardController card, Vector3 position, Vector3 rotation)
         {

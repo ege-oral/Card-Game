@@ -12,6 +12,7 @@ namespace Cards.View
         
         [Header("Card Settings")]
         [SerializeField] public float drawSpeed = 0.5f;
+        [SerializeField] public float cardDrawDelay = 0.1f;
         [SerializeField] public float zRotationRange = 30;
         [SerializeField] public float maxDistance = 2.5f;
         

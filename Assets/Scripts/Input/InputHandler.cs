@@ -1,6 +1,6 @@
 using UnityEngine;
 using Cards.View;
-using Player;
+using Input.Signals;
 using UnityEngine.InputSystem.EnhancedTouch;
 using Zenject;
 
@@ -8,34 +8,23 @@ namespace Input
 {
     public class InputHandler : MonoBehaviour
     {
-        [SerializeField] private PlayerController playerController;
-        
         private GameInput _gameInput;
         private CardDragHandler _cardDragHandler;
+        private SignalBus _signalBus;
         
         [Inject]
-        public void Construct(CardDragHandler cardDragHandler)
+        public void Construct(CardDragHandler cardDragHandler, SignalBus signalBus)
         {
             _cardDragHandler = cardDragHandler;
-        }
-        
-        private void Awake()
-        {
+            _signalBus = signalBus;
+            _signalBus.Subscribe<EnableInputSignal>(EnableInput);
+            _signalBus.Subscribe<DisableInputSignal>(DisableInput);
+            
             _gameInput = new GameInput();
             _gameInput.Player.Click.started += _cardDragHandler.TryDragging;
             _gameInput.Player.Click.canceled += _cardDragHandler.StopDragging;
-        }
-
-        private void OnEnable()
-        {
-            _gameInput.Enable();
             EnhancedTouchSupport.Enable();
-        }
-
-        private void OnDisable()
-        {
-            _gameInput.Disable();
-            EnhancedTouchSupport.Disable();
+            DisableInput();
         }
 
         private void Update()
@@ -45,8 +34,21 @@ namespace Input
 
         private void OnDestroy()
         {
+            _signalBus.Unsubscribe<EnableInputSignal>(EnableInput);
+            _signalBus.Unsubscribe<DisableInputSignal>(DisableInput);
             _gameInput.Player.Click.started -= _cardDragHandler.TryDragging;
             _gameInput.Player.Click.canceled -= _cardDragHandler.StopDragging;
+            EnhancedTouchSupport.Disable();
+        }
+
+        private void EnableInput()
+        {
+            _gameInput.Enable();
+        }
+
+        private void DisableInput()
+        {
+            _gameInput.Disable();
         }
     }
 }

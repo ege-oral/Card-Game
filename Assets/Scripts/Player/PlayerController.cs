@@ -1,10 +1,11 @@
 using System;
-using System.Collections.Generic;
-using Cards.Data;
+using Buttons.Signals;
 using Cards.Services.Sorting.Base;
 using Cards.View;
 using Common;
+using Cysharp.Threading.Tasks;
 using Deck;
+using Input.Signals;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using Zenject;
@@ -18,15 +19,15 @@ namespace Player
         private SignalBus _signalBus;
 
         [SerializeField] private Transform playerHand;
-        [SerializeField] private int maxHandSize = 11; // Maximum cards in hand
         [SerializeField] private CardAnimationController cardAnimationController;
-        
+
         private readonly ReactiveList<CardController> _playerHand = new();
-        
+
         private ISorting _oneTwoThreeSorting;
         private ISorting _sevenSevenSevenSorting;
         private ISorting _smartSorting;
-        
+        private const int MaxHandSize = 11; // Maximum cards in hand
+
         [Inject]
         public void Construct(DeckManager deckManager,
             ICardSortingService cardSortingService,
@@ -38,6 +39,11 @@ namespace Player
             _deckManager = deckManager;
             _cardSortingService = cardSortingService;
             _signalBus = signalBus;
+            _signalBus.Subscribe<DrawCardsSignal>(DrawElevenCards);
+            _signalBus.Subscribe<OneTwoThreeOrderSignal>(OneTwoThreeOrder);
+            _signalBus.Subscribe<SevenSevenSevenOrderSignal>(SevenSevenSevenOrder);
+            _signalBus.Subscribe<SmartOrderSignal>(SmartOrder);
+            
             _oneTwoThreeSorting = oneTwoThreeSorting;
             _sevenSevenSevenSorting = sevenSevenSevenSorting;
             _smartSorting = smartSorting;
@@ -61,7 +67,7 @@ namespace Player
         {
             try
             {
-                await cardAnimationController.PlayDrawAnimation(obj, _playerHand.Items.Count, maxHandSize);
+                await cardAnimationController.PlayDrawAnimation(obj, _playerHand.Items.Count, MaxHandSize);
             }
             catch (Exception e)
             {
@@ -69,35 +75,22 @@ namespace Player
             }
         }
 
-        
         [Button]
-        public void DrawACard()
+        public async void DrawElevenCards()
         {
             try
             {
-                if (_playerHand.Items.Count >= maxHandSize) return;
-                if (_deckManager.TryDrawCard(out var card) == false) return;
-            
-                AddItToHand(card);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError(e);
-            }
-        }
-        
-        [Button]
-        public void DrawNumberOfCards(int drawCount)
-        {
-            try
-            {
-                for (var i = 0; i < drawCount; ++i)
+                for (var i = 0; i < MaxHandSize; ++i)
                 {
-                    if (_playerHand.Items.Count >= maxHandSize) return;
+                    if (_playerHand.Items.Count >= MaxHandSize) return;
                     if (_deckManager.TryDrawCard(out var card) == false) return;
-                
+            
                     AddItToHand(card);
-
+                    await UniTask.Delay(TimeSpan.FromSeconds(cardAnimationController.GetCardDrawDelay()));
+                    if (_playerHand.Items.Count == MaxHandSize)
+                    {
+                        _signalBus.Fire<EnableInputSignal>();
+                    }
                 }
             }
             catch (Exception e)
@@ -106,46 +99,6 @@ namespace Player
             }
         }
         
-        [Button]
-        public void DrawMaxNumberCardsWithEffects()
-        {
-            for (var i = 0; i < maxHandSize; ++i)
-            {
-                if (_playerHand.Items.Count >= maxHandSize) return;
-                if (_deckManager.TryDrawCard(out var card) == false) return;
-                
-                AddItToHand(card);
-            }
-        }
-
-        [Button]
-        public void DrawSpecificCards()
-        {
-            var cardTuples = new List<(CardSuit Suit, int Rank)>
-            {
-                (CardSuit.Hearts, 1),
-                (CardSuit.Spades, 2),
-                (CardSuit.Diamonds, 5),
-                (CardSuit.Hearts, 4),
-                (CardSuit.Spades, 1),
-                (CardSuit.Diamonds, 3),
-                (CardSuit.Clubs, 4),
-                (CardSuit.Spades, 4),
-                (CardSuit.Diamonds, 1),
-                (CardSuit.Spades, 3),
-                (CardSuit.Diamonds, 4)
-            };
-           
-            if (_playerHand.Items.Count >= maxHandSize) return;
-
-            foreach (var (suit, rank) in cardTuples)
-            {
-                if (_deckManager.TryDrawSpecificCard(suit, rank, out var card))
-                {
-                    AddItToHand(card);
-                }
-            }
-        }
         
         private void AddItToHand(CardController card)
         {
@@ -184,7 +137,18 @@ namespace Player
         {
             return _playerHand;
         }
-        
-        // todo: add OnDestroy
+
+        private void OnDestroy()
+        {
+            _signalBus.Unsubscribe<DrawCardsSignal>(DrawElevenCards);
+            _signalBus.Unsubscribe<OneTwoThreeOrderSignal>(OneTwoThreeOrder);
+            _signalBus.Unsubscribe<SevenSevenSevenOrderSignal>(SevenSevenSevenOrder);
+            _signalBus.Unsubscribe<SmartOrderSignal>(SmartOrder);
+            
+            _playerHand.ItemAdded -= Draw;
+            _playerHand.ItemInserted -= ReArrange;
+            _playerHand.ListReplaced -= ReArrange;
+            _playerHand.ItemRemoved -= ReArrange;
+        }
     }
 }
