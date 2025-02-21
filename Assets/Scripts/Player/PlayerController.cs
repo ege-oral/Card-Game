@@ -4,6 +4,7 @@ using System.Linq;
 using Buttons.Signals;
 using Cards.Data;
 using Cards.Services.Sorting.Base;
+using Cards.Signals;
 using Cards.View;
 using Cysharp.Threading.Tasks;
 using Deck;
@@ -84,6 +85,7 @@ namespace Player
                 
                 await PlayDrawAnimation();
                 _signalBus.Fire<EnableInputSignal>();
+                _signalBus.Fire<CardDrawAnimationFinishedSignal>();
             }
             catch (Exception e)
             {
@@ -122,6 +124,7 @@ namespace Player
             }
             await PlayDrawAnimation();
             _signalBus.Fire<EnableInputSignal>();
+            _signalBus.Fire<CardDrawAnimationFinishedSignal>();
         }
 
 

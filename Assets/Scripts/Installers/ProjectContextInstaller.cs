@@ -1,4 +1,5 @@
 using Buttons.Signals;
+using Cards.Signals;
 using Input.Signals;
 using SceneLoader;
 using SceneLoader.Signals;
@@ -21,6 +22,7 @@ namespace Installers
             Container.DeclareSignal<OneTwoThreeOrderSignal>();
             Container.DeclareSignal<SevenSevenSevenOrderSignal>();
             Container.DeclareSignal<SmartOrderSignal>();
+            Container.DeclareSignal<CardDrawAnimationFinishedSignal>();
             
             Container.Bind<SceneLoaderController>().FromComponentInNewPrefab(sceneLoaderPrefab).AsSingle();
         }
