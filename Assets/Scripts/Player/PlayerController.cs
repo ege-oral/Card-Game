@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Buttons.Signals;
+using Cards.Data;
 using Cards.Services.Sorting.Base;
 using Cards.View;
 using Cysharp.Threading.Tasks;
@@ -88,6 +90,40 @@ namespace Player
                 Debug.LogError($"Error while drawing cards: {e.Message}");
             }
         }
+        
+        [Button]
+        public async void DrawSpecificCards()
+        {
+            if (_playerHand.Count >= MaxHandSize) return;
+            _signalBus.Fire<DisableInputSignal>();
+
+            var cardTuples = new List<(CardSuit Suit, int Rank)>
+            {
+                (CardSuit.Hearts, 1),
+                (CardSuit.Spades, 2),
+                (CardSuit.Diamonds, 5),
+                (CardSuit.Hearts, 4),
+                (CardSuit.Spades, 1),
+                (CardSuit.Diamonds, 3),
+                (CardSuit.Clubs, 4),
+                (CardSuit.Spades, 4),
+                (CardSuit.Diamonds, 1),
+                (CardSuit.Spades, 3),
+                (CardSuit.Diamonds, 4)
+            };
+
+
+            foreach (var (suit, rank) in cardTuples)
+            {
+                if (_deckManager.TryDrawSpecificCard(suit, rank, out var card))
+                {
+                    AddCardToHand(card);
+                }
+            }
+            await PlayDrawAnimation();
+            _signalBus.Fire<EnableInputSignal>();
+        }
+
 
         private async UniTask PlayDrawAnimation()
         {
@@ -146,9 +182,11 @@ namespace Player
         {
             if (_playerHand.Count == 0) return;
 
-            var sortedHand = _cardSortingService.SortHandByRule(_playerHand, sortingAlgorithm);
+            var sortedHand = _cardSortingService.SortHandByRule(_playerHand.Select(x => x.CardData).ToList(), sortingAlgorithm);
+            var sortedCards = sortedHand.Select(sortedData => _playerHand.First(card => card.CardData == sortedData)).ToList();
+            
             _playerHand.Clear();
-            _playerHand.AddRange(sortedHand);
+            _playerHand.AddRange(sortedCards);
 
             ReArrangeHand();
         }

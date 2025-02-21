@@ -1,10 +1,10 @@
 using System.Collections.Generic;
-using Cards.View;
+using Cards.Data;
 
 namespace Cards.Services.Sorting.Base
 {
     public interface ICardSortingService
     { 
-        List<CardController> SortHandByRule(IReadOnlyList<CardController> hand, ISorting sortingMethod);
+        List<CardData> SortHandByRule(IReadOnlyList<CardData> hand, ISorting sortingMethod);
     }
 }

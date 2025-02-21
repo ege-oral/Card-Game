@@ -1,10 +1,11 @@
 using System.Collections.Generic;
+using Cards.Data;
 using Cards.View;
 
 namespace Cards.Services.Combinations.Optimization
 {
     public interface ICardCombinationOptimizerService
     {
-        List<CardController> FindBestCombination(IReadOnlyList<CardController> hand, List<List<CardController>> validCombinations);
+        List<CardData> FindBestCombination(IReadOnlyList<CardData> hand, List<List<CardData>> validCombinations);
     }
 }

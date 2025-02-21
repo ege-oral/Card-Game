@@ -1,33 +1,33 @@
 using System.Collections.Generic;
 using System.Linq;
+using Cards.Data;
 using Cards.Services.Sorting.Base;
 using Cards.Utils;
-using Cards.View;
 
 namespace Cards.Services.Sorting.Strategies
 {
     public class SevenSevenSevenSorting : ISorting
     {
-        private readonly List<CardController> _priorityCards = new();
-        private readonly List<CardController> _leftOverCards = new();
+        private readonly List<CardData> _priorityCards = new();
+        private readonly List<CardData> _leftOverCards = new();
         
-        public List<CardController> SortHand(IReadOnlyList<CardController> hand)
+        public List<CardData> SortHand(IReadOnlyList<CardData> hand)
         {
             if (hand == null || hand.Count == 0) return null;
 
             _priorityCards.Clear();
             _leftOverCards.Clear();
 
-            var cardRanksToController = CardUtil.GroupCardsByRank(hand);
-            foreach (var cardControllers in cardRanksToController.Values)
+            var cardRanksToCardData = CardUtil.GroupCardsByRank(hand);
+            foreach (var cardDataList in cardRanksToCardData.Values)
             {
-                if (cardControllers.Count >= 3)
+                if (cardDataList.Count >= 3)
                 {
-                    _priorityCards.AddRange(cardControllers);
+                    _priorityCards.AddRange(cardDataList);
                 }
                 else
                 {
-                    _leftOverCards.AddRange(cardControllers);
+                    _leftOverCards.AddRange(cardDataList);
                 }
             }
 

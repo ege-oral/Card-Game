@@ -1,16 +1,17 @@
 using System.Collections.Generic;
 using System.Linq;
+using Cards.Data;
 using Cards.View;
 
 namespace Cards.Services.Combinations.Validation
 {
     public class CardCombinationValidatorService : ICardCombinationValidatorService
     {
-        private readonly List<List<CardController>> _allValidCombinations = new();
-        private readonly List<List<CardController>> _currentCombination = new();
-        private readonly HashSet<CardController> _usedCards = new();
+        private readonly List<List<CardData>> _allValidCombinations = new();
+        private readonly List<List<CardData>> _currentCombination = new();
+        private readonly HashSet<CardData> _usedCards = new();
         
-        public List<List<CardController>> GetValidCombinations(List<List<CardController>> possibilities)
+        public List<List<CardData>> GetValidCombinations(List<List<CardData>> possibilities)
         {
             _allValidCombinations.Clear();
             _usedCards.Clear();
@@ -47,18 +48,18 @@ namespace Cards.Services.Combinations.Validation
                 }
             }
 
-            bool IsValidCombination(List<CardController> combination)
+            bool IsValidCombination(List<CardData> combination)
             {
                 return combination.All(card => _usedCards.Contains(card) == false);
             }
 
-            void AddCombination(List<CardController> combination)
+            void AddCombination(List<CardData> combination)
             {
                 _currentCombination.Add(combination);
                 foreach (var card in combination) _usedCards.Add(card);
             }
 
-            void RemoveCombination(List<CardController> combination)
+            void RemoveCombination(List<CardData> combination)
             {
                 foreach (var card in combination) _usedCards.Remove(card);
                 _currentCombination.RemoveAt(_currentCombination.Count - 1);

@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
+using Cards.Data;
 using Cards.Services.Combination;
 using Cards.Services.Combinations.Optimization;
 using Cards.Services.Combinations.Validation;
 using Cards.Services.Sorting.Base;
-using Cards.View;
 
 namespace Cards.Services.Sorting.Strategies
 {
@@ -14,8 +14,8 @@ namespace Cards.Services.Sorting.Strategies
         private readonly ICardCombinationValidatorService _cardCombinationValidatorService;
         private readonly ICardCombinationOptimizerService _cardCombinationOptimizerService;
         
-        private List<CardController> _priorityCards = new();
-        private List<CardController> _leftOverCards = new();
+        private List<CardData> _priorityCards = new();
+        private List<CardData> _leftOverCards = new();
 
         public SmartSorting(ICardCombinationsService cardCombinationsService,
             ICardCombinationValidatorService cardCombinationValidatorService,
@@ -26,7 +26,7 @@ namespace Cards.Services.Sorting.Strategies
             _cardCombinationOptimizerService = cardCombinationOptimizerService;
         }
 
-        public List<CardController> SortHand(IReadOnlyList<CardController> hand)
+        public List<CardData> SortHand(IReadOnlyList<CardData> hand)
         {
             _priorityCards.Clear();
             _leftOverCards.Clear();
@@ -39,7 +39,7 @@ namespace Cards.Services.Sorting.Strategies
             return _priorityCards.Count == 0 ? hand.ToList() : _priorityCards.Concat(_leftOverCards).ToList();
         }
 
-        private List<CardController> GetLeftoverCards(IReadOnlyList<CardController> hand, List<CardController> bestCombination)
+        private List<CardData> GetLeftoverCards(IReadOnlyList<CardData> hand, List<CardData> bestCombination)
         {
             foreach (var card in hand)
             {

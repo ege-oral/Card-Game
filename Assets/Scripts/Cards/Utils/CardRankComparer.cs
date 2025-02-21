@@ -1,15 +1,16 @@
 using System.Collections.Generic;
+using Cards.Data;
 using Cards.View;
 
 namespace Cards.Utils
 {
-    public class CardRankComparer : IComparer<CardController>
+    public class CardRankComparer : IComparer<CardData>
     {
-        public int Compare(CardController x, CardController y)
+        public int Compare(CardData x, CardData y)
         {
             if (x == null || y == null) return 0;
             
-            return x.CardData.Rank.CompareTo(y.CardData.Rank);
+            return x.Rank.CompareTo(y.Rank);
         }
     }
 }

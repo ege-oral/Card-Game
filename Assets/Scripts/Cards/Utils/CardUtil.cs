@@ -6,38 +6,38 @@ namespace Cards.Utils
 {
     public static class CardUtil
     {
-        public static Dictionary<CardSuit, List<CardController>> GroupCardsBySuit(IReadOnlyList<CardController> hand)
+        public static Dictionary<CardSuit, List<CardData>> GroupCardsBySuit(IReadOnlyList<CardData> hand)
         {
-            var cardSuitsToController = new Dictionary<CardSuit, List<CardController>>();
+            var cardSuitsToData = new Dictionary<CardSuit, List<CardData>>();
 
-            foreach (var card in hand)
+            foreach (var cardData in hand)
             {
-                if (cardSuitsToController.TryGetValue(card.CardData.Suit, out var cardControllers) == false)
+                if (cardSuitsToData.TryGetValue(cardData.Suit, out var cardControllers) == false)
                 {
-                    cardControllers = new List<CardController>();
-                    cardSuitsToController[card.CardData.Suit] = cardControllers;
+                    cardControllers = new List<CardData>();
+                    cardSuitsToData[cardData.Suit] = cardControllers;
                 }
-                cardControllers.Add(card);
+                cardControllers.Add(cardData);
             }
 
-            return cardSuitsToController;
+            return cardSuitsToData;
         }
         
-        public static Dictionary<int, List<CardController>> GroupCardsByRank(IReadOnlyList<CardController> hand)
+        public static Dictionary<int, List<CardData>> GroupCardsByRank(IReadOnlyList<CardData> hand)
         {
-            var cardRanksToController = new Dictionary<int, List<CardController>>();
+            var cardRanksToData = new Dictionary<int, List<CardData>>();
 
-            foreach (var card in hand)
+            foreach (var cardData in hand)
             {
-                if (cardRanksToController.TryGetValue(card.CardData.Rank, out var cardControllers) == false)
+                if (cardRanksToData.TryGetValue(cardData.Rank, out var cardControllers) == false)
                 {
-                    cardControllers = new List<CardController>();
-                    cardRanksToController[card.CardData.Rank] = cardControllers;
+                    cardControllers = new List<CardData>();
+                    cardRanksToData[cardData.Rank] = cardControllers;
                 }
-                cardControllers.Add(card);
+                cardControllers.Add(cardData);
             }
 
-            return cardRanksToController;
+            return cardRanksToData;
         }
         
         public static List<List<T>> GetCombinations<T>(List<T> list, int r)
