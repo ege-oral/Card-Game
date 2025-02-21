@@ -28,6 +28,8 @@ namespace Cards.Services.Sorting.Strategies
 
         public List<CardData> SortHand(IReadOnlyList<CardData> hand)
         {
+            if (hand == null || hand.Count == 0) return null;
+
             _priorityCards.Clear();
             _leftOverCards.Clear();
             
