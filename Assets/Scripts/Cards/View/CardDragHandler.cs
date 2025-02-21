@@ -1,4 +1,4 @@
-using Common;
+using System.Collections.Generic;
 using Player;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -14,13 +14,13 @@ namespace Cards.View
         private readonly CardNeighborFinder _neighborFinder;
         private readonly Camera _mainCamera;
 
-        private ReactiveList<CardController> _playerHand;
         private CardController _selectedCard;
         private CardController _currentLeft;
         private CardController _previousLeft;
         private CardController _currentRight;
         private CardController _previousRight;
 
+        private IReadOnlyList<CardController> PlayerHand => _playerController.PlayerHand;
         private Vector2 _previousInputPosition;
         private bool _isDragging;
 
@@ -64,8 +64,7 @@ namespace Cards.View
             if (TryGetCardAtPosition(worldPosition, out _selectedCard))
             {
                 _isDragging = true;
-                _playerHand = _playerController.GetHand();
-                _playerHand.Remove(_selectedCard);
+                _playerController.RemoveCardFromHand(_selectedCard);
             }
         }
 
@@ -74,8 +73,7 @@ namespace Cards.View
             if (_selectedCard == null) return;
 
             var insertIndex = DetermineInsertIndex();
-            _playerHand.Insert(insertIndex, _selectedCard);
-
+            _playerController.InsertCardInHand(insertIndex, _selectedCard);
             _cardHighlighter.ClearAllHighlights(_currentLeft, _currentRight, _selectedCard);
             _selectedCard = null;
             _isDragging = false;
@@ -97,7 +95,7 @@ namespace Cards.View
         private void UpdateNearestObjects()
         {
             (_currentLeft, _currentRight) =
-                _neighborFinder.GetNearestLeftAndRight(_selectedCard, _playerHand.Items, _cardAnimationControllerSo.maxDistance);
+                _neighborFinder.GetNearestLeftAndRight(_selectedCard, PlayerHand, _cardAnimationControllerSo.maxDistance);
         }
 
         private void UpdateHighlighting()
@@ -108,16 +106,16 @@ namespace Cards.View
 
         private int DetermineInsertIndex()
         {
-            for (var i = 0; i < _playerHand.Count; i++)
+            for (var i = 0; i < PlayerHand.Count; i++)
             {
-                if (_playerHand[i] == _currentLeft)
+                if (PlayerHand[i] == _currentLeft)
                     return i + 1;
 
-                if (_playerHand[i] == _currentRight)
+                if (PlayerHand[i] == _currentRight)
                     return Mathf.Max(0, i);
             }
 
-            return _playerHand.Count; // Insert at the end if no left/right match
+            return PlayerHand.Count; // Insert at the end if no left/right match
         }
 
         private Vector2 GetInputPosition()

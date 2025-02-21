@@ -17,14 +17,24 @@ namespace Input
         {
             _cardDragHandler = cardDragHandler;
             _signalBus = signalBus;
-            _signalBus.Subscribe<EnableInputSignal>(EnableInput);
-            _signalBus.Subscribe<DisableInputSignal>(DisableInput);
+            _signalBus.Subscribe<EnableInputSignal>(OnEnableInputSignal);
+            _signalBus.Subscribe<DisableInputSignal>(OnDisableInputSignal);
             
             _gameInput = new GameInput();
             _gameInput.Player.Click.started += _cardDragHandler.TryDragging;
             _gameInput.Player.Click.canceled += _cardDragHandler.StopDragging;
+        }
+        
+        private void OnEnable()
+        {
+            _gameInput.Enable();
             EnhancedTouchSupport.Enable();
-            DisableInput();
+        }
+
+        private void OnDisable()
+        {
+            _gameInput.Disable();
+            EnhancedTouchSupport.Disable();
         }
 
         private void Update()
@@ -34,19 +44,18 @@ namespace Input
 
         private void OnDestroy()
         {
-            _signalBus.Unsubscribe<EnableInputSignal>(EnableInput);
-            _signalBus.Unsubscribe<DisableInputSignal>(DisableInput);
+            _signalBus.Unsubscribe<EnableInputSignal>(OnEnableInputSignal);
+            _signalBus.Unsubscribe<DisableInputSignal>(OnDisableInputSignal);
             _gameInput.Player.Click.started -= _cardDragHandler.TryDragging;
             _gameInput.Player.Click.canceled -= _cardDragHandler.StopDragging;
-            EnhancedTouchSupport.Disable();
         }
 
-        private void EnableInput()
+        private void OnEnableInputSignal()
         {
             _gameInput.Enable();
         }
 
-        private void DisableInput()
+        private void OnDisableInputSignal()
         {
             _gameInput.Disable();
         }

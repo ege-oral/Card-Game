@@ -1,8 +1,8 @@
 using System;
+using System.Collections.Generic;
 using Buttons.Signals;
 using Cards.Services.Sorting.Base;
 using Cards.View;
-using Common;
 using Cysharp.Threading.Tasks;
 using Deck;
 using Input.Signals;
@@ -21,15 +21,17 @@ namespace Player
         [SerializeField] private Transform playerHand;
         [SerializeField] private CardAnimationController cardAnimationController;
 
-        private readonly ReactiveList<CardController> _playerHand = new();
+        private readonly List<CardController> _playerHand = new();
+        public IReadOnlyList<CardController> PlayerHand => _playerHand;
 
         private ISorting _oneTwoThreeSorting;
         private ISorting _sevenSevenSevenSorting;
         private ISorting _smartSorting;
-        private const int MaxHandSize = 11; // Maximum cards in hand
+        private const int MaxHandSize = 11;
 
         [Inject]
-        public void Construct(DeckManager deckManager,
+        public void Construct(
+            DeckManager deckManager,
             ICardSortingService cardSortingService,
             SignalBus signalBus,
             [Inject(Id = "OneTwoThreeSorting")] ISorting oneTwoThreeSorting,
@@ -39,40 +41,28 @@ namespace Player
             _deckManager = deckManager;
             _cardSortingService = cardSortingService;
             _signalBus = signalBus;
+
+            _oneTwoThreeSorting = oneTwoThreeSorting;
+            _sevenSevenSevenSorting = sevenSevenSevenSorting;
+            _smartSorting = smartSorting;
+
+            SubscribeToSignals();
+        }
+
+        private void SubscribeToSignals()
+        {
             _signalBus.Subscribe<DrawCardsSignal>(DrawElevenCards);
             _signalBus.Subscribe<OneTwoThreeOrderSignal>(OneTwoThreeOrder);
             _signalBus.Subscribe<SevenSevenSevenOrderSignal>(SevenSevenSevenOrder);
             _signalBus.Subscribe<SmartOrderSignal>(SmartOrder);
-            
-            _oneTwoThreeSorting = oneTwoThreeSorting;
-            _sevenSevenSevenSorting = sevenSevenSevenSorting;
-            _smartSorting = smartSorting;
-            _playerHand.ItemAdded += Draw;
-            _playerHand.ItemInserted += ReArrange;
-            _playerHand.ListReplaced += ReArrange;
-            _playerHand.ItemRemoved += ReArrange;
         }
 
-        private void ReArrange(CardController arg1, int arg2)
+        private void UnsubscribeFromSignals()
         {
-            cardAnimationController.ReArrangeHand(_playerHand.Items);
-        }
-        
-        private void ReArrange(object _)
-        {
-            cardAnimationController.ReArrangeHand(_playerHand.Items);
-        }
-
-        private async void Draw(CardController obj)
-        {
-            try
-            {
-                await cardAnimationController.PlayDrawAnimation(obj, _playerHand.Items.Count, MaxHandSize);
-            }
-            catch (Exception e)
-            {
-                Debug.LogError(e);
-            }
+            _signalBus.Unsubscribe<DrawCardsSignal>(DrawElevenCards);
+            _signalBus.Unsubscribe<OneTwoThreeOrderSignal>(OneTwoThreeOrder);
+            _signalBus.Unsubscribe<SevenSevenSevenOrderSignal>(SevenSevenSevenOrder);
+            _signalBus.Unsubscribe<SmartOrderSignal>(SmartOrder);
         }
 
         [Button]
@@ -80,75 +70,92 @@ namespace Player
         {
             try
             {
-                for (var i = 0; i < MaxHandSize; ++i)
+                if (_playerHand.Count >= MaxHandSize) return;
+
+                _signalBus.Fire<DisableInputSignal>();
+
+                for (var i = 0; i < MaxHandSize; i++)
                 {
-                    if (_playerHand.Items.Count >= MaxHandSize) return;
                     if (_deckManager.TryDrawCard(out var card) == false) return;
-            
-                    AddItToHand(card);
-                    await UniTask.Delay(TimeSpan.FromSeconds(cardAnimationController.GetCardDrawDelay()));
-                    if (_playerHand.Items.Count == MaxHandSize)
-                    {
-                        _signalBus.Fire<EnableInputSignal>();
-                    }
+                    AddCardToHand(card);
                 }
+                
+                await PlayDrawAnimation();
+                _signalBus.Fire<EnableInputSignal>();
             }
             catch (Exception e)
             {
-                Debug.LogError(e);
+                Debug.LogError($"Error while drawing cards: {e.Message}");
             }
         }
-        
-        
-        private void AddItToHand(CardController card)
+
+        private async UniTask PlayDrawAnimation()
+        {
+            var drawAnimationTasks = new List<UniTask>();
+            for (var i = 0; i < _playerHand.Count; i++)
+            {
+                var card = _playerHand[i];
+                // don't wait whole draw animation so add it to a list and continue to draw
+                drawAnimationTasks.Add(cardAnimationController.PlayDrawAnimation(card, i + 1, MaxHandSize));
+                await UniTask.Delay(TimeSpan.FromSeconds(cardAnimationController.GetCardDrawDelay()));
+            }
+            
+            await UniTask.WhenAll(drawAnimationTasks);
+        }
+
+        private void AddCardToHand(CardController card)
         {
             _playerHand.Add(card);
             card.transform.SetParent(playerHand);
         }
-        
-        [Button]
-        public void OneTwoThreeOrder()
-        {
-            if(_playerHand.Items == null || _playerHand.Items.Count == 0) return;
-            
-            var sortHandByOneTwoThree = _cardSortingService.SortHandByRule(_playerHand.Items, _oneTwoThreeSorting);
-            _playerHand.Replace(sortHandByOneTwoThree);
-        }
-        
-        [Button]
-        public void SevenSevenSevenOrder()
-        {
-            if(_playerHand.Items == null || _playerHand.Items.Count == 0) return;
 
-            var sortHandBySevenSevenSeven = _cardSortingService.SortHandByRule(_playerHand.Items, _sevenSevenSevenSorting);
-            _playerHand.Replace(sortHandBySevenSevenSeven);
-        }
-        
-        [Button]
-        public void SmartOrder()
+        public void RemoveCardFromHand(CardController card)
         {
-            if(_playerHand.Items == null || _playerHand.Items.Count == 0) return;
-
-            var sortHandBySmart = _cardSortingService.SortHandByRule(_playerHand.Items, _smartSorting);
-            _playerHand.Replace(sortHandBySmart);
+            if (_playerHand.Remove(card))
+            {
+                ReArrangeHand();
+            }
         }
 
-        public ReactiveList<CardController> GetHand()
+        public void InsertCardInHand(int index, CardController card)
         {
-            return _playerHand;
+            if (index < 0 || index > _playerHand.Count)
+            {
+                index = _playerHand.Count; // Insert at end if out of bounds
+            }
+
+            _playerHand.Insert(index, card);
+            ReArrangeHand();
+        }
+
+        private void ReArrangeHand()
+        {
+            cardAnimationController.ReArrangeHand(_playerHand);
+        }
+
+        [Button]
+        public void OneTwoThreeOrder() => SortHand(_oneTwoThreeSorting);
+
+        [Button]
+        public void SevenSevenSevenOrder() => SortHand(_sevenSevenSevenSorting);
+
+        [Button]
+        public void SmartOrder() => SortHand(_smartSorting);
+
+        private void SortHand(ISorting sortingAlgorithm)
+        {
+            if (_playerHand.Count == 0) return;
+
+            var sortedHand = _cardSortingService.SortHandByRule(_playerHand, sortingAlgorithm);
+            _playerHand.Clear();
+            _playerHand.AddRange(sortedHand);
+
+            ReArrangeHand();
         }
 
         private void OnDestroy()
         {
-            _signalBus.Unsubscribe<DrawCardsSignal>(DrawElevenCards);
-            _signalBus.Unsubscribe<OneTwoThreeOrderSignal>(OneTwoThreeOrder);
-            _signalBus.Unsubscribe<SevenSevenSevenOrderSignal>(SevenSevenSevenOrder);
-            _signalBus.Unsubscribe<SmartOrderSignal>(SmartOrder);
-            
-            _playerHand.ItemAdded -= Draw;
-            _playerHand.ItemInserted -= ReArrange;
-            _playerHand.ListReplaced -= ReArrange;
-            _playerHand.ItemRemoved -= ReArrange;
+            UnsubscribeFromSignals();
         }
     }
 }
