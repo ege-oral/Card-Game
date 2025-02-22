@@ -1,6 +1,5 @@
-using System;
+using Board.Services;
 using Buttons.Signals;
-using Cards.Signals;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
@@ -10,41 +9,28 @@ namespace Buttons
     public class RestartGameButton : MonoBehaviour
     {
         [SerializeField] private Button restartGameButton;
-        private SignalBus _signalBus;
 
+        private IBoardAnimationService _boardAnimationService;
+        private SignalBus _signalBus;
+        
         [Inject]
-        public void Construct(SignalBus signalBus)
+        public void Construct(IBoardAnimationService boardAnimationService, SignalBus signalBus)
         {
+            _boardAnimationService = boardAnimationService;
             _signalBus = signalBus;
-            _signalBus.Subscribe<CardDrawAnimationStartedSignal>(DisableButton);
-            _signalBus.Subscribe<HandReArrangeAnimationStartedSignal>(DisableButton);
-            
-            _signalBus.Subscribe<CardDrawAnimationFinishedSignal>(EnableButton);
-            _signalBus.Subscribe<HandReArrangeAnimationFinishedSignal>(EnableButton);
         }
-        
-        private void OnButtonClicked()
-        {
-            _signalBus.Fire<RestartGameSignal>();
-        }
-        
-        private void DisableButton()
-        {
-            restartGameButton.onClick.RemoveListener(OnButtonClicked);
-        }
-        
-        private void EnableButton()
+
+        private void Awake()
         {
             restartGameButton.onClick.AddListener(OnButtonClicked);
         }
 
-        private void OnDestroy()
+        private void OnButtonClicked()
         {
-            _signalBus.Unsubscribe<CardDrawAnimationStartedSignal>(DisableButton);
-            _signalBus.Unsubscribe<HandReArrangeAnimationStartedSignal>(DisableButton);
+            if (_boardAnimationService.IsAnyAnimationPlaying()) return;
             
-            _signalBus.Unsubscribe<CardDrawAnimationFinishedSignal>(EnableButton);
-            _signalBus.Unsubscribe<HandReArrangeAnimationFinishedSignal>(EnableButton);
+            _signalBus.Fire<RestartGameSignal>();
         }
+        
     }
 }
