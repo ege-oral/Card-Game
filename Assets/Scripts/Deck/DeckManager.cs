@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Cards.Config;
 using Cards.Data;
 using Cards.View;
-using Cards.Factory;
+using Cards.Pool;
 using UnityEngine;
 using Zenject;
 
@@ -12,29 +12,58 @@ namespace Deck
     {
         [SerializeField] private Transform deckParent;
         [SerializeField] private CardDataConfig cardDataConfig;
-        
-        private CardControllerFactory _cardFactory;
+        private const string DeckSortingLayerName = "Deck";
+
+        private CardPool _cardPool;
         private readonly List<CardController> _deckList = new();
         private const float CardOffset = 0.015f;
 
         [Inject]
-        public void Construct(CardControllerFactory cardFactory)
+        public void Construct(CardPool cardPool)
         {
-            _cardFactory = cardFactory;
-        }
-
-        private void Start()
-        {
-            var orderedCardList = GenerateOrderedCardList();
-            var shuffleCardList = ShuffleCardList(orderedCardList);
-            ArrangeDeckVisually(shuffleCardList);
+            _cardPool = cardPool;
         }
         
+        public void CreateDeck()
+        {
+            var orderedCardList = GenerateOrderedCardList();
+            var shuffledCardList = ShuffleCardList(orderedCardList);
+            ArrangeDeckVisually(shuffledCardList);
+        }
+
+        public void ResetDeck()
+        {
+            ReturnAllCardsToPool();
+        }
+        
+        public void ResetDeckAndCreateDeck()
+        {
+            ResetDeck();
+            CreateDeck();
+        }
+
+        private void ReturnAllCardsToPool()
+        {
+            foreach (var card in _deckList)
+            {
+                _cardPool.ReturnCard(card);
+            }
+
+            _deckList.Clear();
+        }
+        
+        public void ReturnCardToDeck(CardController card)
+        {
+            card.gameObject.SetActive(false);
+            card.transform.SetParent(deckParent);
+            _deckList.Add(card);
+        }
+
         public bool TryDrawCard(out CardController card)
         {
             if (_deckList.Count > 0)
             {
-                card = _deckList[^1]; // Get the last card
+                card = _deckList[^1];
                 _deckList.RemoveAt(_deckList.Count - 1);
                 return true;
             }
@@ -67,7 +96,7 @@ namespace Deck
             {
                 foreach (var (rank, sprite) in spriteData)
                 {
-                    var card = _cardFactory.Create();
+                    var card = _cardPool.GetCard();
                     var cardData = new CardData(suit, rank, sprite, cardDataConfig.backSprite);
 
                     card.Initialize(cardData);
@@ -95,14 +124,11 @@ namespace Deck
             {
                 var card = deckList[i];
                 card.transform.SetParent(deckParent, worldPositionStays: false);
+                card.transform.SetSiblingIndex(i);
+                card.UpdateSorting(i, DeckSortingLayerName);
                 card.transform.rotation = Quaternion.Euler(-120, 0, 0);
                 card.transform.position = deckParent.position + Vector3.up * (CardOffset * i);
             }
-        }
-
-        public List<CardController> GetDeckList()
-        {
-            return _deckList;
         }
     }
 }

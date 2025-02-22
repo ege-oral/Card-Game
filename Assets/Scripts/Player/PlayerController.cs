@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Buttons.Signals;
 using Cards.Data;
 using Cards.Services.Sorting.Base;
@@ -31,7 +32,7 @@ namespace Player
         private ISorting _sevenSevenSevenSorting;
         private ISorting _smartSorting;
         private const int MaxHandSize = 11;
-
+        
         [Inject]
         public void Construct(
             DeckManager deckManager,
@@ -76,6 +77,7 @@ namespace Player
                 if (_playerHand.Count >= MaxHandSize) return;
 
                 _signalBus.Fire<DisableInputSignal>();
+                _signalBus.Fire<CardDrawAnimationStartedSignal>();
 
                 for (var i = 0; i < MaxHandSize; i++)
                 {
@@ -98,6 +100,8 @@ namespace Player
         {
             if (_playerHand.Count >= MaxHandSize) return;
             _signalBus.Fire<DisableInputSignal>();
+            _signalBus.Fire<CardDrawAnimationStartedSignal>();
+
 
             var cardTuples = new List<(CardSuit Suit, int Rank)>
             {
@@ -166,10 +170,33 @@ namespace Player
             _playerHand.Insert(index, card);
             ReArrangeHand();
         }
-
-        private void ReArrangeHand()
+        
+        public void ResetPlayerHand()
         {
-            cardAnimationController.ReArrangeHand(_playerHand);
+            // Return all cards to the deck
+            foreach (var card in _playerHand)
+            {
+                _deckManager.ReturnCardToDeck(card);
+            }
+
+            _playerHand.Clear();
+        }
+        
+        private async void ReArrangeHand()
+        {
+            try
+            {
+                _signalBus.Fire<HandReArrangeAnimationStartedSignal>();
+                await cardAnimationController.ReArrangeHand(_playerHand);
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Error while rearranging hand: {e.Message}");
+            }
+            finally
+            {
+                _signalBus.Fire<HandReArrangeAnimationFinishedSignal>();
+            }
         }
 
         [Button]
@@ -185,11 +212,12 @@ namespace Player
         {
             if (_playerHand.Count == 0) return;
 
+            // Get sorted order of CardData
             var sortedHand = _cardSortingService.SortHandByRule(_playerHand.Select(x => x.CardData).ToList(), sortingAlgorithm);
-            var sortedCards = sortedHand.Select(sortedData => _playerHand.First(card => card.CardData == sortedData)).ToList();
-            
-            _playerHand.Clear();
-            _playerHand.AddRange(sortedCards);
+
+            // Reorder existing _playerHand list to match the sorted order
+            _playerHand.Sort((a, b) => 
+                sortedHand.IndexOf(a.CardData).CompareTo(sortedHand.IndexOf(b.CardData)));
 
             ReArrangeHand();
         }

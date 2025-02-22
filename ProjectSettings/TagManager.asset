@@ -41,6 +41,12 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Deck
+    uniqueID: 1555484991
+    locked: 0
+  - name: PlayerHand
+    uniqueID: 1894847643
+    locked: 0
   - name: SelectedCard
     uniqueID: 1999868189
     locked: 0

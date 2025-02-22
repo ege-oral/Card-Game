@@ -22,7 +22,11 @@ namespace Installers
             Container.DeclareSignal<OneTwoThreeOrderSignal>();
             Container.DeclareSignal<SevenSevenSevenOrderSignal>();
             Container.DeclareSignal<SmartOrderSignal>();
+            Container.DeclareSignal<CardDrawAnimationStartedSignal>();
             Container.DeclareSignal<CardDrawAnimationFinishedSignal>();
+            Container.DeclareSignal<HandReArrangeAnimationStartedSignal>();
+            Container.DeclareSignal<HandReArrangeAnimationFinishedSignal>();
+            Container.DeclareSignal<RestartGameSignal>();
             
             Container.Bind<SceneLoaderController>().FromComponentInNewPrefab(sceneLoaderPrefab).AsSingle();
         }

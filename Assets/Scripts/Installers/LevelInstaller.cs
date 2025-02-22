@@ -1,5 +1,6 @@
 using Cards.View;
 using Cards.Factory;
+using Cards.Pool;
 using Cards.Services.Combinations.Combination;
 using Cards.Services.Combinations.Optimization;
 using Cards.Services.Combinations.Validation;
@@ -7,6 +8,7 @@ using Cards.Services.Sorting.Base;
 using Cards.Services.Sorting.Strategies;
 using Cards.Utils;
 using Cards.View.Services;
+using Core;
 using Deck;
 using Player;
 using UnityEngine;
@@ -21,9 +23,11 @@ namespace Installers
         
         public override void InstallBindings()
         {
+            Container.Bind<GameManager>().FromComponentInHierarchy().AsSingle();
             Container.Bind<PlayerController>().FromComponentInHierarchy().AsSingle();
             Container.Bind<DeckManager>().FromComponentInHierarchy().AsSingle();
             Container.BindFactory<CardController, CardControllerFactory>().FromComponentInNewPrefab(cardPrefab);
+            Container.Bind<CardPool>().FromComponentInHierarchy().AsSingle();
             Container.BindInstance(cardAnimationControllerSo).AsSingle();
 
             Container.Bind<ISorting>().WithId("OneTwoThreeSorting").To<OneTwoThreeSorting>().AsSingle();
