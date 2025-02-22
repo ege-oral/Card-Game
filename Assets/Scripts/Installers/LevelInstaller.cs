@@ -1,3 +1,4 @@
+using Board.Services;
 using Cards.View;
 using Cards.Factory;
 using Cards.Pool;
@@ -42,6 +43,7 @@ namespace Installers
             Container.Bind<CardDragHandler>().AsSingle();
             Container.Bind<CardHighlighter>().AsSingle();
             Container.Bind<CardNeighborFinder>().AsSingle();
+            Container.BindInterfacesTo<BoardAnimationService>().AsSingle();
         }
     }
 }

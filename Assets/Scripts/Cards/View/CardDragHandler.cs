@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using Player;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -56,10 +57,14 @@ namespace Cards.View
             _previousInputPosition = inputPosition;
         }
 
-        public void TryDragging(InputAction.CallbackContext _)
+        public void TryDragging(InputAction.CallbackContext context)
         {
-            var inputPosition = GetInputPosition();
-            var worldPosition = GetMouseWorldPosition(inputPosition);
+            TryDragging(GetInputPosition());
+        }
+
+        public void TryDragging(Vector2 screenPosition)
+        {
+            var worldPosition = GetMouseWorldPosition(screenPosition);
 
             if (TryGetCardAtPosition(worldPosition, out _selectedCard))
             {
@@ -68,7 +73,12 @@ namespace Cards.View
             }
         }
 
-        public void StopDragging(InputAction.CallbackContext _)
+        public void StopDragging(InputAction.CallbackContext context)
+        {
+            StopDragging();
+        }
+
+        public void StopDragging()
         {
             if (_selectedCard == null) return;
 
@@ -84,8 +94,12 @@ namespace Cards.View
             var hit = Physics2D.Raycast(position, Vector2.zero);
             if (hit.collider != null && hit.collider.TryGetComponent(out CardController hitCardController))
             {
-                cardController = hitCardController;
-                return true;
+                // Ensure the card is in the player's hand before returning it
+                if (_playerController.PlayerHand.Contains(hitCardController))
+                {
+                    cardController = hitCardController;
+                    return true;
+                }
             }
 
             cardController = null;

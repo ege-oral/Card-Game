@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using Buttons.Signals;
 using Cards.Data;
 using Cards.Services.Sorting.Base;
@@ -195,6 +194,7 @@ namespace Player
             }
             finally
             {
+                Debug.Log("here");
                 _signalBus.Fire<HandReArrangeAnimationFinishedSignal>();
             }
         }

@@ -2,6 +2,7 @@ using UnityEngine;
 using Cards.View;
 using Input.Signals;
 using UnityEngine.InputSystem.EnhancedTouch;
+using UnityEngine.InputSystem;
 using Zenject;
 
 namespace Input
@@ -11,7 +12,7 @@ namespace Input
         private GameInput _gameInput;
         private CardDragHandler _cardDragHandler;
         private SignalBus _signalBus;
-        
+
         [Inject]
         public void Construct(CardDragHandler cardDragHandler, SignalBus signalBus)
         {
@@ -21,6 +22,8 @@ namespace Input
             _signalBus.Subscribe<DisableInputSignal>(OnDisableInputSignal);
             
             _gameInput = new GameInput();
+
+            // Handle Mouse Inputs (for PC)
             _gameInput.Player.Click.started += _cardDragHandler.TryDragging;
             _gameInput.Player.Click.canceled += _cardDragHandler.StopDragging;
         }
@@ -29,12 +32,16 @@ namespace Input
         {
             _gameInput.Enable();
             EnhancedTouchSupport.Enable();
+
+           
         }
 
         private void OnDisable()
         {
             _gameInput.Disable();
             EnhancedTouchSupport.Disable();
+
+            
         }
 
         private void Update()
@@ -53,11 +60,42 @@ namespace Input
         private void OnEnableInputSignal()
         {
             _gameInput.Enable();
+            TouchSimulation.Enable();
+            
+
+            // Subscribe to mobile touch inputs
+            UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerDown += OnFingerDown;
+            UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerMove += OnFingerMove;
+            UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerUp += OnFingerUp;
+
         }
 
         private void OnDisableInputSignal()
         {
             _gameInput.Disable();
+            TouchSimulation.Disable();
+            
+            // Unsubscribe from touch inputs
+            UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerDown -= OnFingerDown;
+            UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerMove -= OnFingerMove;
+            UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerUp -= OnFingerUp;
+
+        }
+
+        // Handle touch input
+        private void OnFingerDown(Finger finger)
+        {
+            _cardDragHandler.TryDragging(finger.screenPosition);
+        }
+
+        private void OnFingerMove(Finger finger)
+        {
+            _cardDragHandler.HandleDragging();
+        }
+
+        private void OnFingerUp(Finger finger)
+        {
+            _cardDragHandler.StopDragging();
         }
     }
 }
