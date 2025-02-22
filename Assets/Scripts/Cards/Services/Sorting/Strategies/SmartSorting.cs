@@ -26,6 +26,12 @@ namespace Cards.Services.Sorting.Strategies
             _cardCombinationOptimizerService = cardCombinationOptimizerService;
         }
 
+        /// <summary>
+        /// Sorts the given hand of cards based on optimized valid combinations.
+        /// This operation is computationally expensive and may cause visual spikes 
+        /// if processing more than 30 cards at once. Use with caution to maintain performance.
+        /// </summary>
+        
         public List<CardData> SortHand(IReadOnlyList<CardData> hand)
         {
             if (hand == null || hand.Count == 0) return null;
