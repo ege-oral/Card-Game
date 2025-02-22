@@ -30,7 +30,6 @@ namespace Cards.View
         private bool _isDragging;
         private const float CoolDownDelay = 0.2f;
 
-
         [Inject]
         public CardDragHandler(PlayerController playerController,
             CardAnimationControllerSo cardAnimationControllerSo,
@@ -48,9 +47,9 @@ namespace Cards.View
 
         public void HandleDragging()
         {
-            if (_isDragging == false || _selectedCard == null) return;
+            if (!_isDragging || _selectedCard == null) return;
 
-            var inputPosition = GetInputPosition();
+            var inputPosition = GetPointerPosition();
             _selectedCard.transform.position = GetMouseWorldPosition(inputPosition);
 
             var normalized = Mathf.InverseLerp(_cardAnimationControllerSo.startPoint.x, 
@@ -65,12 +64,12 @@ namespace Cards.View
             _previousInputPosition = inputPosition;
         }
 
-        public void TryDragging(InputAction.CallbackContext context) => _ = TryDragging(GetInputPosition());
+        public void TryDragging(InputAction.CallbackContext context) => _ = TryDragging(GetPointerPosition());
 
         public async UniTaskVoid TryDragging(Vector2 screenPosition)
         {
             if (_isDragging || _boardAnimationService.IsAnyAnimationPlaying()) return;
-            
+
             var worldPosition = GetMouseWorldPosition(screenPosition);
             if (TryGetCardAtPosition(worldPosition, out _selectedCard) == false) return;
 
@@ -98,13 +97,13 @@ namespace Cards.View
             cardController = null;
 
             var hit = Physics2D.Raycast(position, Vector2.zero);
-            if (hit.collider == null || hit.collider.TryGetComponent(out CardController hitCardController) == false) return false;
-            if (_playerController.PlayerHand.Contains(hitCardController) == false) return false;
+            if (hit.collider == null || !hit.collider.TryGetComponent(out CardController hitCardController)) return false;
+            if (!_playerController.PlayerHand.Contains(hitCardController)) return false;
 
             cardController = hitCardController;
             return true;
         }
-        
+
         private void UpdateNearestObjects()
         {
             (_currentLeft, _currentRight) =
@@ -131,9 +130,9 @@ namespace Cards.View
             return PlayerHand.Count; // Insert at the end if no left/right match
         }
 
-        private Vector2 GetInputPosition() =>
-            UnityEngine.Input.touchCount > 0
-                ? UnityEngine.Input.touches[0].position
+        private Vector2 GetPointerPosition() =>
+            Touchscreen.current?.primaryTouch.press.isPressed == true
+                ? Touchscreen.current.primaryTouch.position.ReadValue()
                 : Mouse.current.position.ReadValue();
 
         private Vector2 GetMouseWorldPosition(Vector2 inputPosition) =>
