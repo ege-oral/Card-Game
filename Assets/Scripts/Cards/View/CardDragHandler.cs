@@ -1,5 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using Board.Services;
+using Cysharp.Threading.Tasks;
 using Player;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -13,6 +16,7 @@ namespace Cards.View
         private readonly CardAnimationControllerSo _cardAnimationControllerSo;
         private readonly CardHighlighter _cardHighlighter;
         private readonly CardNeighborFinder _neighborFinder;
+        private readonly IBoardAnimationService _boardAnimationService;
         private readonly Camera _mainCamera;
 
         private CardController _selectedCard;
@@ -24,23 +28,27 @@ namespace Cards.View
         private IReadOnlyList<CardController> PlayerHand => _playerController.PlayerHand;
         private Vector2 _previousInputPosition;
         private bool _isDragging;
+        private const float CoolDownDelay = 0.2f;
+
 
         [Inject]
         public CardDragHandler(PlayerController playerController,
             CardAnimationControllerSo cardAnimationControllerSo,
             CardHighlighter cardHighlighter,
-            CardNeighborFinder neighborFinder)
+            CardNeighborFinder neighborFinder, 
+            IBoardAnimationService boardAnimationService)
         {
             _playerController = playerController;
             _cardAnimationControllerSo = cardAnimationControllerSo;
             _cardHighlighter = cardHighlighter;
             _neighborFinder = neighborFinder;
+            _boardAnimationService = boardAnimationService;
             _mainCamera = Camera.main;
         }
 
         public void HandleDragging()
         {
-            if (!_isDragging || _selectedCard == null) return;
+            if (_isDragging == false || _selectedCard == null) return;
 
             var inputPosition = GetInputPosition();
             _selectedCard.transform.position = GetMouseWorldPosition(inputPosition);
@@ -57,26 +65,22 @@ namespace Cards.View
             _previousInputPosition = inputPosition;
         }
 
-        public void TryDragging(InputAction.CallbackContext context)
-        {
-            TryDragging(GetInputPosition());
-        }
+        public void TryDragging(InputAction.CallbackContext context) => _ = TryDragging(GetInputPosition());
 
-        public void TryDragging(Vector2 screenPosition)
+        public async UniTaskVoid TryDragging(Vector2 screenPosition)
         {
+            if (_isDragging || _boardAnimationService.IsAnyAnimationPlaying()) return;
+            
             var worldPosition = GetMouseWorldPosition(screenPosition);
+            if (TryGetCardAtPosition(worldPosition, out _selectedCard) == false) return;
 
-            if (TryGetCardAtPosition(worldPosition, out _selectedCard))
-            {
-                _isDragging = true;
-                _playerController.RemoveCardFromHand(_selectedCard);
-            }
+            _isDragging = true;
+            _playerController.RemoveCardFromHand(_selectedCard);
+
+            await UniTask.Delay(TimeSpan.FromSeconds(CoolDownDelay)); // Prevent spam clicking
         }
 
-        public void StopDragging(InputAction.CallbackContext context)
-        {
-            StopDragging();
-        }
+        public void StopDragging(InputAction.CallbackContext context) => StopDragging();
 
         public void StopDragging()
         {
@@ -91,19 +95,14 @@ namespace Cards.View
 
         private bool TryGetCardAtPosition(Vector2 position, out CardController cardController)
         {
-            var hit = Physics2D.Raycast(position, Vector2.zero);
-            if (hit.collider != null && hit.collider.TryGetComponent(out CardController hitCardController))
-            {
-                // Ensure the card is in the player's hand before returning it
-                if (_playerController.PlayerHand.Contains(hitCardController))
-                {
-                    cardController = hitCardController;
-                    return true;
-                }
-            }
-
             cardController = null;
-            return false;
+
+            var hit = Physics2D.Raycast(position, Vector2.zero);
+            if (hit.collider == null || hit.collider.TryGetComponent(out CardController hitCardController) == false) return false;
+            if (_playerController.PlayerHand.Contains(hitCardController) == false) return false;
+
+            cardController = hitCardController;
+            return true;
         }
         
         private void UpdateNearestObjects()
@@ -132,17 +131,13 @@ namespace Cards.View
             return PlayerHand.Count; // Insert at the end if no left/right match
         }
 
-        private Vector2 GetInputPosition()
-        {
-            return UnityEngine.Input.touchCount > 0
+        private Vector2 GetInputPosition() =>
+            UnityEngine.Input.touchCount > 0
                 ? UnityEngine.Input.touches[0].position
                 : Mouse.current.position.ReadValue();
-        }
 
-        private Vector2 GetMouseWorldPosition(Vector2 inputPosition)
-        {
-            return _mainCamera.ScreenToWorldPoint(new Vector3(inputPosition.x, inputPosition.y,
+        private Vector2 GetMouseWorldPosition(Vector2 inputPosition) =>
+            _mainCamera.ScreenToWorldPoint(new Vector3(inputPosition.x, inputPosition.y,
                 _mainCamera.transform.position.z * -1));
-        }
     }
 }

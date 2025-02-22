@@ -19,6 +19,7 @@ namespace Installers
             Container.DeclareSignal<EnableInputSignal>();
             Container.DeclareSignal<DisableInputSignal>();
             Container.DeclareSignal<DrawCardsSignal>();
+            Container.DeclareSignal<DrawSpecificCardsSignal>();
             Container.DeclareSignal<OneTwoThreeOrderSignal>();
             Container.DeclareSignal<SevenSevenSevenOrderSignal>();
             Container.DeclareSignal<SmartOrderSignal>();

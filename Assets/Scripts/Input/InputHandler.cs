@@ -85,7 +85,7 @@ namespace Input
         // Handle touch input
         private void OnFingerDown(Finger finger)
         {
-            _cardDragHandler.TryDragging(finger.screenPosition);
+            _ = _cardDragHandler.TryDragging(finger.screenPosition);
         }
 
         private void OnFingerMove(Finger finger)

@@ -1,6 +1,5 @@
 using System;
 using Cards.Signals;
-using UnityEngine;
 using Zenject;
 
 namespace Board.Services
@@ -24,13 +23,11 @@ namespace Board.Services
         private void IncreaseAnimationCounter()
         {
             _animationCounter += 1;
-            Debug.Log($"Animation Counter Increased, new value is {_animationCounter}");
         }
 
         private void DecreaseAnimationCounter()
         {
             _animationCounter -= 1;
-            Debug.Log($"Animation Counter Decreased, new value is {_animationCounter}");
         }
         
         private void SubscribeToSignals()

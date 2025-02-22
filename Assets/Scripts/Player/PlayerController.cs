@@ -55,6 +55,7 @@ namespace Player
         private void SubscribeToSignals()
         {
             _signalBus.Subscribe<DrawCardsSignal>(DrawElevenCards);
+            _signalBus.Subscribe<DrawSpecificCardsSignal>(DrawSpecificCards);
             _signalBus.Subscribe<OneTwoThreeOrderSignal>(OneTwoThreeOrder);
             _signalBus.Subscribe<SevenSevenSevenOrderSignal>(SevenSevenSevenOrder);
             _signalBus.Subscribe<SmartOrderSignal>(SmartOrder);
@@ -63,6 +64,7 @@ namespace Player
         private void UnsubscribeFromSignals()
         {
             _signalBus.Unsubscribe<DrawCardsSignal>(DrawElevenCards);
+            _signalBus.Unsubscribe<DrawSpecificCardsSignal>(DrawSpecificCards);
             _signalBus.Unsubscribe<OneTwoThreeOrderSignal>(OneTwoThreeOrder);
             _signalBus.Unsubscribe<SevenSevenSevenOrderSignal>(SevenSevenSevenOrder);
             _signalBus.Unsubscribe<SmartOrderSignal>(SmartOrder);
@@ -74,10 +76,7 @@ namespace Player
             try
             {
                 if (_playerHand.Count >= MaxHandSize) return;
-
-                _signalBus.Fire<DisableInputSignal>();
-                _signalBus.Fire<CardDrawAnimationStartedSignal>();
-
+                
                 for (var i = 0; i < MaxHandSize; i++)
                 {
                     if (_deckManager.TryDrawCard(out var card) == false) return;
@@ -85,8 +84,6 @@ namespace Player
                 }
                 
                 await PlayDrawAnimation();
-                _signalBus.Fire<EnableInputSignal>();
-                _signalBus.Fire<CardDrawAnimationFinishedSignal>();
             }
             catch (Exception e)
             {
@@ -97,42 +94,38 @@ namespace Player
         [Button]
         public async void DrawSpecificCards()
         {
-            if (_playerHand.Count >= MaxHandSize) return;
-            _signalBus.Fire<DisableInputSignal>();
-            _signalBus.Fire<CardDrawAnimationStartedSignal>();
-
-
-            var cardTuples = new List<(CardSuit Suit, int Rank)>
+            try
             {
-                (CardSuit.Hearts, 1),
-                (CardSuit.Spades, 2),
-                (CardSuit.Diamonds, 5),
-                (CardSuit.Hearts, 4),
-                (CardSuit.Spades, 1),
-                (CardSuit.Diamonds, 3),
-                (CardSuit.Clubs, 4),
-                (CardSuit.Spades, 4),
-                (CardSuit.Diamonds, 1),
-                (CardSuit.Spades, 3),
-                (CardSuit.Diamonds, 4)
-            };
-
-
-            foreach (var (suit, rank) in cardTuples)
-            {
-                if (_deckManager.TryDrawSpecificCard(suit, rank, out var card))
+                if (_playerHand.Count >= MaxHandSize) return;
+                
+                var cardTuples = new List<(CardSuit Suit, int Rank)>
                 {
-                    AddCardToHand(card);
-                }
-            }
-            await PlayDrawAnimation();
-            _signalBus.Fire<EnableInputSignal>();
-            _signalBus.Fire<CardDrawAnimationFinishedSignal>();
-        }
+                    (CardSuit.Hearts, 1), (CardSuit.Spades, 2), (CardSuit.Diamonds, 5), (CardSuit.Hearts, 4), 
+                    (CardSuit.Spades, 1), (CardSuit.Diamonds, 3), (CardSuit.Clubs, 4), (CardSuit.Spades, 4),
+                    (CardSuit.Diamonds, 1), (CardSuit.Spades, 3), (CardSuit.Diamonds, 4)
+                };
 
+                foreach (var (suit, rank) in cardTuples)
+                {
+                    if (_deckManager.TryDrawSpecificCard(suit, rank, out var card))
+                    {
+                        AddCardToHand(card);
+                    }
+                }
+                await PlayDrawAnimation();
+                
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Error while drawing cards: {e.Message}");
+            }
+        }
 
         private async UniTask PlayDrawAnimation()
         {
+            _signalBus.Fire<DisableInputSignal>();
+            _signalBus.Fire<CardDrawAnimationStartedSignal>();
+            
             var drawAnimationTasks = new List<UniTask>();
             for (var i = 0; i < _playerHand.Count; i++)
             {
@@ -143,6 +136,9 @@ namespace Player
             }
             
             await UniTask.WhenAll(drawAnimationTasks);
+            
+            _signalBus.Fire<EnableInputSignal>();
+            _signalBus.Fire<CardDrawAnimationFinishedSignal>();
         }
 
         private void AddCardToHand(CardController card)
@@ -194,7 +190,6 @@ namespace Player
             }
             finally
             {
-                Debug.Log("here");
                 _signalBus.Fire<HandReArrangeAnimationFinishedSignal>();
             }
         }
