@@ -12,6 +12,7 @@ namespace Cards.View
 
         private int _savedSortingOrder;
         private string _savedSortingLayerName;
+        private const string SelectedCardSortingLayer = "SelectedCard";
         
         public void Initialize(CardData cardData)
         {
@@ -32,14 +33,14 @@ namespace Cards.View
             backRenderer.sortingLayerName = sortingLayerName;
         }
         
-        public void Highlight(int sortingOrder, string sortingLayerName = "Default")
+        public void Highlight(int sortingOrder)
         {
             transform.localScale = Vector3.one * 1.1f;
             frontRenderer.sortingOrder = sortingOrder;
-            frontRenderer.sortingLayerName = sortingLayerName;
+            frontRenderer.sortingLayerName = SelectedCardSortingLayer;
             
             backRenderer.sortingOrder = sortingOrder;
-            backRenderer.sortingLayerName = sortingLayerName;
+            backRenderer.sortingLayerName = SelectedCardSortingLayer;
         }
 
         public void DeHighlight()

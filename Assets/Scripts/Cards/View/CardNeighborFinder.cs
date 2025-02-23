@@ -27,7 +27,7 @@ namespace Cards.View
                     nearestRight = card;
                     nearestRightDist = distance;
                 }
-                else if (!isOnRight && distance < nearestLeftDist)
+                else if (isOnRight == false && distance < nearestLeftDist)
                 {
                     nearestLeft = card;
                     nearestLeftDist = distance;

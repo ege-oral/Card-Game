@@ -47,11 +47,9 @@ namespace Cards.View
 
         public void HandleDragging()
         {
-            if (!_isDragging || _selectedCard == null) return;
+            if (_isDragging == false || _selectedCard == null) return;
 
-            var inputPosition = GetPointerPosition();
-            _selectedCard.transform.position = GetWorldPosition(inputPosition);
-
+            var inputPosition = GetPointerPosition(); _selectedCard.transform.position = GetWorldPosition(inputPosition);
             var normalized = Mathf.InverseLerp(
                 _cardAnimationControllerSo.startPoint.x,
                 _cardAnimationControllerSo.endPoint.x,

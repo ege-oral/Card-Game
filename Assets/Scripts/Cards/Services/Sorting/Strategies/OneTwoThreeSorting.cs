@@ -46,7 +46,7 @@ namespace Cards.Services.Sorting.Strategies
                     _cardSequence.Add(currentCard);
 
                     var isConsecutive = currentCard.Rank == nextCard.Rank - 1;
-                    if (!isConsecutive)
+                    if (isConsecutive == false)
                     {
                         StoreSequence();
                         _cardSequence.Clear();

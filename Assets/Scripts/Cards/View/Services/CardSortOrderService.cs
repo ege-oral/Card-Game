@@ -1,5 +1,3 @@
-using Cards.Services;
-
 namespace Cards.View.Services
 {
     public class CardSortOrderService : ICardSortOrderService

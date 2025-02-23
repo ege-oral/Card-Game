@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Cards.Data;
-using Cards.View;
 
 namespace Cards.Utils
 {

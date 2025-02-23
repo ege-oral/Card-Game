@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Cards.Data;
-using Cards.View;
 
 namespace Cards.Services.Combinations.Validation
 {

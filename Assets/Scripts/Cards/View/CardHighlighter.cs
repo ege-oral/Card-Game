@@ -4,15 +4,13 @@ namespace Cards.View
 {
     public class CardHighlighter
     {
-        private const string SelectedCardSortingLayer = "SelectedCard";
-
         public void UpdateHighlighting(CardController selectedCard, ref CardController previousLeft,
             CardController currentLeft, ref CardController previousRight, CardController currentRight, Vector2 previousInputPosition)
         {
             var isDraggingRight = selectedCard.transform.position.x > previousInputPosition.x;
 
             // Highlight the selected card
-            selectedCard.Highlight(0, SelectedCardSortingLayer);
+            selectedCard.Highlight(0);
 
             // Highlight nearest left & right cards
             SwapHighlight(ref previousLeft, currentLeft, isDraggingRight ? 1 : -1);
@@ -27,7 +25,7 @@ namespace Cards.View
                 previous = current;
             }
 
-            current?.Highlight(direction, SelectedCardSortingLayer);
+            current?.Highlight(direction);
         }
 
         public void ClearAllHighlights(CardController left, CardController right, CardController selected)
