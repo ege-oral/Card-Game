@@ -8,7 +8,6 @@ using Cards.Signals;
 using Cards.View;
 using Cysharp.Threading.Tasks;
 using Deck;
-using Input.Signals;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using Zenject;
@@ -123,7 +122,6 @@ namespace Player
 
         private async UniTask PlayDrawAnimation()
         {
-            _signalBus.Fire<DisableInputSignal>();
             _signalBus.Fire<CardDrawAnimationStartedSignal>();
             
             var drawAnimationTasks = new List<UniTask>();
@@ -137,7 +135,6 @@ namespace Player
             
             await UniTask.WhenAll(drawAnimationTasks);
             
-            _signalBus.Fire<EnableInputSignal>();
             _signalBus.Fire<CardDrawAnimationFinishedSignal>();
         }
 

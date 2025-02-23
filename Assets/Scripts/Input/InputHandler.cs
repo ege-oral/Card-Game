@@ -1,92 +1,57 @@
 using Cards.View;
-using Input.Signals;
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.EnhancedTouch;
 using Zenject;
 
 namespace Input
 {
     public class InputHandler : MonoBehaviour
     {
-        private GameInput _gameInput;
         private CardDragHandler _cardDragHandler;
-        private SignalBus _signalBus;
 
         [Inject]
         public void Construct(CardDragHandler cardDragHandler, SignalBus signalBus)
         {
             _cardDragHandler = cardDragHandler;
-            _signalBus = signalBus;
+        }
 
-            _gameInput = new GameInput();
+        private void Update()
+        {
+            HandleMouseInput();
+            HandleTouchInput();
+        }
+
+        private void HandleMouseInput()
+        {
+            if (UnityEngine.Input.GetMouseButton(0))
+                _ = _cardDragHandler.TryDragging();
             
-            // Subscribe to Input Signals
-            _signalBus.Subscribe<EnableInputSignal>(OnEnableInputSignal);
-            _signalBus.Subscribe<DisableInputSignal>(OnDisableInputSignal);
-
-            // Register PC Inputs (Mouse)
-            _gameInput.Player.Click.started += _cardDragHandler.TryDragging;
-            _gameInput.Player.Click.canceled += _cardDragHandler.StopDragging;
-        }
-        
-        private void OnEnable()
-        {
-            _gameInput.Enable();
-            EnhancedTouchSupport.Enable();
-
-            // Subscribe to Mobile Touch Inputs
-            UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerDown += OnFingerDown;
-            UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerMove += OnFingerMove;
-            UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerUp += OnFingerUp;
+            if (UnityEngine.Input.GetMouseButton(0))
+                _cardDragHandler.HandleDragging();
+            
+            if (UnityEngine.Input.GetMouseButtonUp(0))
+                _cardDragHandler.StopDragging();
         }
 
-        private void OnDisable()
+        private void HandleTouchInput()
         {
-            _gameInput.Disable();
-            EnhancedTouchSupport.Disable();
+            if (UnityEngine.Input.touchCount == 0) return;
 
-            // Unsubscribe from Touch Inputs
-            UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerDown -= OnFingerDown;
-            UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerMove -= OnFingerMove;
-            UnityEngine.InputSystem.EnhancedTouch.Touch.onFingerUp -= OnFingerUp;
-        }
-
-        private void OnDestroy()
-        {
-            _signalBus.Unsubscribe<EnableInputSignal>(OnEnableInputSignal);
-            _signalBus.Unsubscribe<DisableInputSignal>(OnDisableInputSignal);
-
-            _gameInput.Player.Click.started -= _cardDragHandler.TryDragging;
-            _gameInput.Player.Click.canceled -= _cardDragHandler.StopDragging;
-        }
-
-        private void OnEnableInputSignal()
-        {
-            _gameInput.Enable();
-            TouchSimulation.Enable();
-        }
-
-        private void OnDisableInputSignal()
-        {
-            _gameInput.Disable();
-            TouchSimulation.Disable();
-        }
-
-        // 🔹 Handle Mobile Touch Inputs
-        private void OnFingerDown(Finger finger)
-        {
-            _ = _cardDragHandler.TryDragging(finger.screenPosition);
-        }
-
-        private void OnFingerMove(Finger finger)
-        {
-            _cardDragHandler.HandleDragging();
-        }
-
-        private void OnFingerUp(Finger finger)
-        {
-            _cardDragHandler.StopDragging();
+            var touch = UnityEngine.Input.GetTouch(0);
+            
+            switch (touch.phase)
+            {
+                case TouchPhase.Began:
+                    _ = _cardDragHandler.TryDragging();
+                    break;
+                case TouchPhase.Moved:
+                case TouchPhase.Stationary:
+                    _cardDragHandler.HandleDragging();
+                    break;
+                case TouchPhase.Ended:
+                case TouchPhase.Canceled:
+                    _cardDragHandler.StopDragging();
+                    break;
+            }
         }
     }
 }

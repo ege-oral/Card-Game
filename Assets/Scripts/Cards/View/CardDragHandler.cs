@@ -5,7 +5,6 @@ using Board.Services;
 using Cysharp.Threading.Tasks;
 using Player;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using Zenject;
 
 namespace Cards.View
@@ -31,10 +30,11 @@ namespace Cards.View
         private const float CoolDownDelay = 0.2f;
 
         [Inject]
-        public CardDragHandler(PlayerController playerController,
+        public CardDragHandler(
+            PlayerController playerController,
             CardAnimationControllerSo cardAnimationControllerSo,
             CardHighlighter cardHighlighter,
-            CardNeighborFinder neighborFinder, 
+            CardNeighborFinder neighborFinder,
             IBoardAnimationService boardAnimationService)
         {
             _playerController = playerController;
@@ -50,11 +50,12 @@ namespace Cards.View
             if (!_isDragging || _selectedCard == null) return;
 
             var inputPosition = GetPointerPosition();
-            _selectedCard.transform.position = GetMouseWorldPosition(inputPosition);
+            _selectedCard.transform.position = GetWorldPosition(inputPosition);
 
-            var normalized = Mathf.InverseLerp(_cardAnimationControllerSo.startPoint.x, 
-                                                    _cardAnimationControllerSo.endPoint.x, 
-                                                    _selectedCard.transform.position.x);
+            var normalized = Mathf.InverseLerp(
+                _cardAnimationControllerSo.startPoint.x,
+                _cardAnimationControllerSo.endPoint.x,
+                _selectedCard.transform.position.x);
 
             _selectedCard.transform.rotation = Quaternion.Euler(0, 0, _cardAnimationControllerSo.GetRotationAngle(normalized));
 
@@ -64,13 +65,12 @@ namespace Cards.View
             _previousInputPosition = inputPosition;
         }
 
-        public void TryDragging(InputAction.CallbackContext context) => _ = TryDragging(GetPointerPosition());
-
-        public async UniTaskVoid TryDragging(Vector2 screenPosition)
+        public async UniTaskVoid TryDragging()
         {
             if (_isDragging || _boardAnimationService.IsAnyAnimationPlaying()) return;
 
-            var worldPosition = GetMouseWorldPosition(screenPosition);
+            var screenPosition = GetPointerPosition();
+            var worldPosition = GetWorldPosition(screenPosition);
             if (TryGetCardAtPosition(worldPosition, out _selectedCard) == false) return;
 
             _isDragging = true;
@@ -78,8 +78,6 @@ namespace Cards.View
 
             await UniTask.Delay(TimeSpan.FromSeconds(CoolDownDelay)); // Prevent spam clicking
         }
-
-        public void StopDragging(InputAction.CallbackContext context) => StopDragging();
 
         public void StopDragging()
         {
@@ -95,10 +93,9 @@ namespace Cards.View
         private bool TryGetCardAtPosition(Vector2 position, out CardController cardController)
         {
             cardController = null;
-
             var hit = Physics2D.Raycast(position, Vector2.zero);
-            if (hit.collider == null || !hit.collider.TryGetComponent(out CardController hitCardController)) return false;
-            if (!_playerController.PlayerHand.Contains(hitCardController)) return false;
+            if (hit.collider == null || hit.collider.TryGetComponent(out CardController hitCardController) == false) return false;
+            if (PlayerHand.Contains(hitCardController) == false) return false;
 
             cardController = hitCardController;
             return true;
@@ -130,13 +127,20 @@ namespace Cards.View
             return PlayerHand.Count; // Insert at the end if no left/right match
         }
 
-        private Vector2 GetPointerPosition() =>
-            Touchscreen.current?.primaryTouch.press.isPressed == true
-                ? Touchscreen.current.primaryTouch.position.ReadValue()
-                : Mouse.current.position.ReadValue();
+        private Vector2 GetPointerPosition()
+        {
+            if (UnityEngine.Input.touchCount > 0)
+            {
+                return UnityEngine.Input.GetTouch(0).position;
+            }
 
-        private Vector2 GetMouseWorldPosition(Vector2 inputPosition) =>
-            _mainCamera.ScreenToWorldPoint(new Vector3(inputPosition.x, inputPosition.y,
-                _mainCamera.transform.position.z * -1));
+            return UnityEngine.Input.mousePosition;
+        }
+
+        private Vector2 GetWorldPosition(Vector2 inputPosition)
+        {
+            return _mainCamera.ScreenToWorldPoint(new Vector3(
+                inputPosition.x, inputPosition.y, _mainCamera.transform.position.z * -1));
+        }
     }
 }

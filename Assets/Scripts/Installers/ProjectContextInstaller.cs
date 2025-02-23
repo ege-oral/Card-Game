@@ -1,6 +1,5 @@
 using Buttons.Signals;
 using Cards.Signals;
-using Input.Signals;
 using SceneLoader;
 using SceneLoader.Signals;
 using UnityEngine;
@@ -16,8 +15,6 @@ namespace Installers
         {
             SignalBusInstaller.Install(Container);
             Container.DeclareSignal<LoadNextLevelSignal>();
-            Container.DeclareSignal<EnableInputSignal>();
-            Container.DeclareSignal<DisableInputSignal>();
             Container.DeclareSignal<DrawCardsSignal>();
             Container.DeclareSignal<DrawSpecificCardsSignal>();
             Container.DeclareSignal<OneTwoThreeOrderSignal>();
