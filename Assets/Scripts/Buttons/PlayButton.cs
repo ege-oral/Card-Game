@@ -10,6 +10,7 @@ namespace Buttons
         [SerializeField] private Button button;
         
         private SignalBus _signalBus;
+        private bool _isClicked;
 
         [Inject]
         public void Construct(SignalBus signalBus)
@@ -29,6 +30,9 @@ namespace Buttons
 
         private void OnButtonClicked()
         {
+            if (_isClicked) return; // Prevent multiple clicks
+            
+            _isClicked = true;
             _signalBus.Fire<LoadNextLevelSignal>();
         }
     }
