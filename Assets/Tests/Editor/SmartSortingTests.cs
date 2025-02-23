@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Cards.Data;
-using Cards.Services.Combination;
 using Cards.Services.Combinations.Combination;
 using Cards.Services.Combinations.Optimization;
 using Cards.Services.Combinations.Validation;
@@ -68,7 +67,6 @@ namespace Tests.Editor
             CollectionAssert.AreEqual(hand, result);
         }
         
-
         [Test]
         public void SmartSorting_SortHand_WhenHandContainsValidGroupsUseHearts3ForOtherGroup_ReturnsSortedHand()
         {
@@ -113,8 +111,6 @@ namespace Tests.Editor
             Assert.AreEqual(expectedMinValue, 21);
         }
         
-        // Okay------------------
-        
         
         [Test]
         public void SmartSorting_SortHand_WhenHandContainsThreeValidGroupsAndLeftovers_SortsCorrectly()
@@ -122,17 +118,9 @@ namespace Tests.Editor
             
             var hand = CreateHand(new[]
             {
-                (CardSuit.Hearts, 1),
-                (CardSuit.Spades, 2),
-                (CardSuit.Diamonds, 5),
-                (CardSuit.Hearts, 4),
-                (CardSuit.Spades, 1),
-                (CardSuit.Diamonds, 3),
-                (CardSuit.Clubs, 4),
-                (CardSuit.Spades, 4),
-                (CardSuit.Diamonds, 1),
-                (CardSuit.Spades, 3),
-                (CardSuit.Diamonds, 4)
+                (CardSuit.Hearts, 1), (CardSuit.Spades, 2), (CardSuit.Diamonds, 5), (CardSuit.Hearts, 4),
+                (CardSuit.Spades, 1), (CardSuit.Diamonds, 3), (CardSuit.Clubs, 4), (CardSuit.Spades, 4),
+                (CardSuit.Diamonds, 1), (CardSuit.Spades, 3), (CardSuit.Diamonds, 4)
             });
 
             var result = _smartSorting.SortHand(hand);

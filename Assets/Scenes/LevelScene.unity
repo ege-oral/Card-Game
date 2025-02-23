@@ -3110,7 +3110,7 @@ GameObject:
   - component: {fileID: 1776111329}
   - component: {fileID: 1776111328}
   m_Layer: 0
-  m_Name: TimeScaleCheat
+  m_Name: TimeScaleCheatForTesting
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -31,7 +31,7 @@ namespace Deck
             ArrangeDeckVisually(shuffledCardList);
         }
 
-        public void ResetDeck()
+        private void ResetDeck()
         {
             ReturnAllCardsToPool();
         }
@@ -125,9 +125,9 @@ namespace Deck
                 var card = deckList[i];
                 card.transform.SetParent(deckParent, worldPositionStays: false);
                 card.transform.SetSiblingIndex(i);
-                card.UpdateSorting(i, DeckSortingLayerName);
                 card.transform.rotation = Quaternion.Euler(-120, 0, 0);
                 card.transform.position = deckParent.position + Vector3.up * (CardOffset * i);
+                card.UpdateSorting(i, DeckSortingLayerName);
             }
         }
     }

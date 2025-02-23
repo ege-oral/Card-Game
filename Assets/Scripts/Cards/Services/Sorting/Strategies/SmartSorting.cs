@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Cards.Data;
-using Cards.Services.Combination;
+using Cards.Services.Combinations.Combination;
 using Cards.Services.Combinations.Optimization;
 using Cards.Services.Combinations.Validation;
 using Cards.Services.Sorting.Base;

@@ -16,19 +16,19 @@ namespace Player
 {
     public class PlayerController : MonoBehaviour
     {
+        [SerializeField] private Transform playerHand;
+        [SerializeField] private CardAnimationController cardAnimationController;
+        
         private DeckManager _deckManager;
         private ICardSortingService _cardSortingService;
         private SignalBus _signalBus;
-
-        [SerializeField] private Transform playerHand;
-        [SerializeField] private CardAnimationController cardAnimationController;
+        private ISorting _oneTwoThreeSorting;
+        private ISorting _sevenSevenSevenSorting;
+        private ISorting _smartSorting;
 
         private readonly List<CardController> _playerHand = new();
         public IReadOnlyList<CardController> PlayerHand => _playerHand;
 
-        private ISorting _oneTwoThreeSorting;
-        private ISorting _sevenSevenSevenSorting;
-        private ISorting _smartSorting;
         private const int MaxHandSize = 11;
         
         [Inject]
@@ -208,9 +208,7 @@ namespace Player
             var sortedHand = _cardSortingService.SortHandByRule(_playerHand.Select(x => x.CardData).ToList(), sortingAlgorithm);
 
             // Reorder existing _playerHand list to match the sorted order
-            _playerHand.Sort((a, b) => 
-                sortedHand.IndexOf(a.CardData).CompareTo(sortedHand.IndexOf(b.CardData)));
-
+            _playerHand.Sort((a, b) => sortedHand.IndexOf(a.CardData).CompareTo(sortedHand.IndexOf(b.CardData)));
             ReArrangeHand();
         }
 
