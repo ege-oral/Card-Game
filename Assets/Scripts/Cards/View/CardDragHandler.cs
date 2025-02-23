@@ -27,7 +27,7 @@ namespace Cards.View
         private IReadOnlyList<CardController> PlayerHand => _playerController.PlayerHand;
         private Vector2 _previousInputPosition;
         private bool _isDragging;
-        private const float CoolDownDelay = 0.2f;
+        private const float CoolDownDelay = 0.1f;
 
         [Inject]
         public CardDragHandler(
