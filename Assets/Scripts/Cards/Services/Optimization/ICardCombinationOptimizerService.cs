@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Cards.Data;
 
-namespace Cards.Services.Combinations.Optimization
+namespace Cards.Services.Optimization
 {
     public interface ICardCombinationOptimizerService
     {

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Cards.Data;
 using Cards.Utils;
 
-namespace Cards.Services.Combinations.Combination
+namespace Cards.Services.Combination
 {
     public class CardCombinationsService : ICardCombinationsService
     {

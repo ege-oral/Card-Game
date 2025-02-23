@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Cards.Data;
 
-namespace Cards.Services.Combinations.Validation
+namespace Cards.Services.Validation
 {
     public interface ICardCombinationValidatorService
     {

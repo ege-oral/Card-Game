@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Cards.Data;
 
-namespace Cards.Services.Combinations.Combination
+namespace Cards.Services.Combination
 {
     public interface ICardCombinationsService
     {

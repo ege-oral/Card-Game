@@ -3,7 +3,7 @@ using System.Linq;
 using Cards.Data;
 using UnityEngine;
 
-namespace Cards.Services.Combinations.Optimization
+namespace Cards.Services.Optimization
 {
     public class CardCombinationOptimizerService : ICardCombinationOptimizerService
     {

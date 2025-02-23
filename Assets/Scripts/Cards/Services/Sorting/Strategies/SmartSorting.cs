@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using Cards.Data;
-using Cards.Services.Combinations.Combination;
-using Cards.Services.Combinations.Optimization;
-using Cards.Services.Combinations.Validation;
+using Cards.Services.Combination;
+using Cards.Services.Optimization;
 using Cards.Services.Sorting.Base;
+using Cards.Services.Validation;
 
 namespace Cards.Services.Sorting.Strategies
 {
