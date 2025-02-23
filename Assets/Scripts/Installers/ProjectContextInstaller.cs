@@ -2,6 +2,7 @@ using Buttons.Signals;
 using Cards.Signals;
 using SceneLoader;
 using SceneLoader.Signals;
+using Theme.Signals;
 using UnityEngine;
 using Zenject;
 
@@ -25,6 +26,7 @@ namespace Installers
             Container.DeclareSignal<HandReArrangeAnimationStartedSignal>();
             Container.DeclareSignal<HandReArrangeAnimationFinishedSignal>();
             Container.DeclareSignal<RestartGameSignal>();
+            Container.DeclareSignal<ChangeCardsThemeSignal>();
             
             Container.Bind<SceneLoaderController>().FromComponentInNewPrefab(sceneLoaderPrefab).AsSingle();
         }

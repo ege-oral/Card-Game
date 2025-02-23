@@ -75,12 +75,12 @@ MonoBehaviour:
     SerializationNodes:
     - Name: CardSpritesBySuit
       Entry: 7
-      Data: 0|System.Collections.Generic.Dictionary`2[[Cards.CardSuit, Assembly-CSharp],[System.Collections.Generic.Dictionary`2[[System.Int32,
+      Data: 0|System.Collections.Generic.Dictionary`2[[Cards.Data.CardSuit, Game.Scripts],[System.Collections.Generic.Dictionary`2[[System.Int32,
         mscorlib],[UnityEngine.Sprite, UnityEngine.CoreModule]], mscorlib]], mscorlib
     - Name: comparer
       Entry: 7
-      Data: 1|System.Collections.Generic.EnumEqualityComparer`1[[Cards.CardSuit,
-        Assembly-CSharp]], mscorlib
+      Data: 1|System.Collections.Generic.EnumEqualityComparer`1[[Cards.Data.CardSuit,
+        Game.Scripts]], mscorlib
     - Name: 
       Entry: 12
       Data: 0
@@ -839,4 +839,4 @@ MonoBehaviour:
     - Name: 
       Entry: 8
       Data: 
-  backSprite: {fileID: 21300000, guid: 39b99bdc8ed2d457bb17d3806bac2197, type: 3}
+  backSprite: {fileID: 21300000, guid: 2b2035a2d59b04eb1abe0639f63da23a, type: 3}

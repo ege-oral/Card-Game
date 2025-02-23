@@ -3,6 +3,7 @@ using Cards.Config;
 using Cards.Data;
 using Cards.View;
 using Cards.Pool;
+using Theme;
 using UnityEngine;
 using Zenject;
 
@@ -12,6 +13,8 @@ namespace Deck
     {
         [SerializeField] private Transform deckParent;
         [SerializeField] private CardDataConfig cardDataConfig;
+        [SerializeField] private ThemeManager themeManager;
+        
         private const string DeckSortingLayerName = "Deck";
 
         private CardPool _cardPool;
@@ -97,7 +100,7 @@ namespace Deck
                 foreach (var (rank, sprite) in spriteData)
                 {
                     var card = _cardPool.GetCard();
-                    var cardData = new CardData(suit, rank, sprite, cardDataConfig.backSprite);
+                    var cardData = new CardData(suit, rank, sprite, themeManager.DefaultTheme.background);
 
                     card.Initialize(cardData);
                     _deckList.Add(card);

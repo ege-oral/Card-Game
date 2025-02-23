@@ -1,4 +1,6 @@
+using System;
 using Cards.Data;
+using Theme.Data;
 using UnityEngine;
 
 namespace Cards.View
@@ -51,6 +53,11 @@ namespace Cards.View
             
             backRenderer.sortingOrder = _savedSortingOrder;
             backRenderer.sortingLayerName = _savedSortingLayerName;
+        }
+
+        public void UpdateTheme(Sprite backgroundTheme)
+        {
+            backRenderer.sprite = backgroundTheme;
         }
     }
 }
