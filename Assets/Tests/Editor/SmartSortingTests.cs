@@ -87,7 +87,6 @@ namespace Tests.Editor
             Assert.AreEqual(hand.Count, result.Count);
             Assert.AreEqual(expectedMinValue, 3);
         }
-        
 
         [Test]
         public void SmartSorting_SortHand_WhenMultipleValidCombinationsExist_ChoosesBestOne()
@@ -111,7 +110,6 @@ namespace Tests.Editor
             Assert.AreEqual(expectedMinValue, 21);
         }
         
-        
         [Test]
         public void SmartSorting_SortHand_WhenHandContainsThreeValidGroupsAndLeftovers_SortsCorrectly()
         {
@@ -132,6 +130,66 @@ namespace Tests.Editor
             Assert.NotNull(result);
             Assert.AreEqual(hand.Count, result.Count);
             Assert.AreEqual(expectedMinValue, 2);
+        }
+        
+        [Test]
+        public void SmartSorting_SortHand_WhenHandContainsTwoValidGroupsAndLeftovers_SortsCorrectly()
+        {
+            var hand = CreateHand(new[]
+            {
+                (CardSuit.Spades, 10), (CardSuit.Spades, 11), (CardSuit.Spades, 12), (CardSuit.Spades, 13),
+                (CardSuit.Diamonds, 11),  (CardSuit.Diamonds, 9), (CardSuit.Diamonds, 10), (CardSuit.Clubs, 10), 
+            });
+
+            var result = _smartSorting.SortHand(hand);
+            
+            // (CardSuit.Clubs, 10)
+            var expectedLeftOverCards = result.Skip(Math.Max(0, result.Count - 1)).ToList();
+            var expectedMinValue = expectedLeftOverCards.Sum(x => x.Value);
+            
+            Assert.NotNull(result);
+            Assert.AreEqual(hand.Count, result.Count);
+            Assert.AreEqual(expectedMinValue, 10);
+        }
+        
+        [Test]
+        public void SmartSorting_SortHand_WhenHandContainsOneValidGroupsAndLeftovers_SortsCorrectly()
+        {
+            var hand = CreateHand(new[]
+            {
+                (CardSuit.Spades, 1), (CardSuit.Spades, 2), (CardSuit.Spades, 3), (CardSuit.Spades, 4),
+                (CardSuit.Diamonds, 3), (CardSuit.Hearts, 3)
+            });
+
+            var result = _smartSorting.SortHand(hand);
+            
+            // (CardSuit.Diamonds, 3), (CardSuit.Hearts, 3)
+            var expectedLeftOverCards = result.Skip(Math.Max(0, result.Count - 2)).ToList();
+            var expectedMinValue = expectedLeftOverCards.Sum(x => x.Value);
+            
+            Assert.NotNull(result);
+            Assert.AreEqual(hand.Count, result.Count);
+            Assert.AreEqual(expectedMinValue, 6);
+        }
+        
+        [Test]
+        public void SmartSorting_SortHand_WhenHandContainsTwoValidGroupsAndLeftovers_SortsCorrectly_Second()
+        {
+            var hand = CreateHand(new[]
+            {
+                (CardSuit.Spades, 1), (CardSuit.Spades, 2), (CardSuit.Spades, 3), (CardSuit.Spades, 4),
+                (CardSuit.Diamonds, 4), (CardSuit.Hearts, 4), (CardSuit.Hearts, 1),
+            });
+
+            var result = _smartSorting.SortHand(hand);
+            
+            // (CardSuit.Hearts, 1),
+            var expectedLeftOverCards = result.Skip(Math.Max(0, result.Count - 1)).ToList();
+            var expectedMinValue = expectedLeftOverCards.Sum(x => x.Value);
+            
+            Assert.NotNull(result);
+            Assert.AreEqual(hand.Count, result.Count);
+            Assert.AreEqual(expectedMinValue, 1);
         }
 
         private List<CardData> CreateHand(IEnumerable<(CardSuit Suit, int Rank)> cards)
