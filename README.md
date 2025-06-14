@@ -42,7 +42,13 @@ A mobile and PC compatible card game prototype developed in Unity. This project 
 - **Unity Input System**
 - **NUnit**
 
-## 🔧 Setup
+## Setup
 1.	Open the project in Unity 2022.3 LTS or later.
 2.	Make sure Git LFS is installed to fetch all assets properly.
 3.	All required packages (UniTask, DOTween, Zenject) are included via UPM or embedded in the project.
+
+## APK
+https://drive.google.com/file/d/1sqFFYBU9dz0AV4ZxuUrjPG11b2I9UlOG/view?usp=sharing
+
+## Gameplay
+https://drive.google.com/file/d/1zfnzIGvaGkJzwb0rEbxGO4GhumH658kg/view?usp=drive_link
